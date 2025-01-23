@@ -4,5 +4,6 @@ RewriteEngine On
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 
-# Redirecionar todas as requisições restantes para index.php, mantendo o método HTTP original
+# Redirecionar para index.php
 RewriteRule ^ index.php [QSA,L]
+

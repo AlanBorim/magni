@@ -9,7 +9,7 @@ class App
     public static function setLanguage(string $language): void
     {
         self::$language = $language;
-        $_SESSION['language'] = $language; // Armazena na sessão
+        
         setcookie('language', $language, time() + (3600 * 24 * 30), '/'); // Armazena no cookie
     }
 

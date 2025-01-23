@@ -35,12 +35,12 @@ class Router
      */
     public function handleRequest()
     {
-        session_start();
+       
 
         // Verifica se o idioma está na URL
         $uri = strtok($_SERVER['REQUEST_URI'], '?');
         if (!preg_match('/^\/(pt|en)\//', $uri)) {
-            $language = $_SESSION['language'] ?? 'pt';
+            $language = LanguageDetector::detectLanguage()['language'] ?? 'pt';
             header("Location: /$language$uri");
             exit;
         }

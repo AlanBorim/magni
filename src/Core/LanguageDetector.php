@@ -15,7 +15,7 @@ class LanguageDetector
         $uri = trim($_SERVER['REQUEST_URI'], '/');
         $segments = explode('/', $uri);
 
-        $languageCode = $segments[0] ?? null;
+        $languageCode = $segments[0] ?? 'pt';
 
         if (in_array($languageCode, ['pt', 'en'])) {
             return [
@@ -25,13 +25,13 @@ class LanguageDetector
         }
 
         // Redirecionar para o idioma padrão
-        self::redirectToDefaultLanguage($uri);
+        self::redirectToDefaultLanguage($uri,$languageCode);
     }
 
-    private static function redirectToDefaultLanguage($uri): void
+    private static function redirectToDefaultLanguage($uri,$selectedLanguage): void
     {
         $cleanUri = preg_replace('/^\/(pt|en)/', '', $uri); // Remove idioma duplicado
-        header("Location: /pt$cleanUri");
+        header("Location: /$selectedLanguage$cleanUri");
         exit;
     }
 }
