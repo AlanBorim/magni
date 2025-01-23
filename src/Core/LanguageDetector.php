@@ -8,30 +8,70 @@ class LanguageDetector
     private static $defaultLanguage = 'pt';
 
     /**
-     * Detecta o idioma com base na URL e redireciona se necessário.
+     * Detecta o idioma com base na URL e redireciona conforme o estado de login do usuário.
      */
     public static function detectLanguage(): array
     {
         $uri = trim($_SERVER['REQUEST_URI'], '/');
         $segments = explode('/', $uri);
 
-        $languageCode = $segments[0] ?? 'pt';
+        $languageCode = $segments[0] ?? self::$defaultLanguage;
 
-        if (in_array($languageCode, ['pt', 'en'])) {
+        if (array_key_exists($languageCode, self::$supportedLanguages)) {
+            // Retorna o idioma detectado e a basePath
             return [
                 'language' => $languageCode,
                 'basePath' => '/' . $languageCode,
             ];
+        }else{
+            return [
+                'language' => self::$defaultLanguage,
+                'basePath' => '/' . self::$defaultLanguage . '/',
+            ];
         }
-
-        // Redirecionar para o idioma padrão
-        self::redirectToDefaultLanguage($uri,$languageCode);
     }
 
-    private static function redirectToDefaultLanguage($uri,$selectedLanguage): void
+    public static function handleAccess(bool $isLoggedIn = false): void
     {
-        $cleanUri = preg_replace('/^\/(pt|en)/', '', $uri); // Remove idioma duplicado
-        header("Location: /$selectedLanguage$cleanUri");
+        $uri = trim($_SERVER['REQUEST_URI'], '/');
+        $segments = explode('/', $uri);
+
+        $languageCode = $segments[0] ?? self::$defaultLanguage;
+
+        if (array_key_exists($languageCode, self::$supportedLanguages)) {
+            // Retorna o idioma detectado e a basePath
+            $language = [
+                'language' => $languageCode,
+                'basePath' => '/' . $languageCode,
+            ];
+        }else{
+            $language = [
+                'language' => self::$defaultLanguage,
+                'basePath' => '/' . self::$defaultLanguage . '/',
+            ];
+        }
+
+        // Se o idioma não for suportado, redirecionar para o padrão
+        self::manageAccess($language, $isLoggedIn);
+    }
+
+    /**
+     * Redireciona para o idioma padrão ou dashboard com base no estado de login.
+     */
+    private static function manageAccess(array $uri, bool $isLoggedIn = false): void
+    {
+        echo $uri['basePath'];
+        exit;
+
+        if ($isLoggedIn) {
+            // Usuário logado: redireciona para o dashboard no idioma padrão
+            header("Location: " . $uri['basePath'] . "dashboard");
+        } else {
+            // Usuário não logado: redireciona para o idioma padrão
+            header("Location: " . $uri['basePath']);
+        }
+
         exit;
     }
 }
+

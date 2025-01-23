@@ -2,15 +2,11 @@
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use App\Core\App;
 use App\Core\ViewHelper;
 use App\Core\Security;
+use App\Core\LanguageDetector;
 
-
-// Detectar idioma pelo caminho da URL
-$currentLanguage = App::getLanguage();
-
-// Translation::init($locale);
+$currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 Security::enforceSessionSecurity();
 

@@ -55,7 +55,7 @@ class Router
             (new $class())->$method();
         } else {
             http_response_code(404);
-            echo "404 Not Found";
+            include __DIR__ . '/../inc/error404.php';
         }
     }
 

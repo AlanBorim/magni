@@ -3,46 +3,11 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use App\Core\App;
 use App\Core\ViewHelper;
+use App\Core\LanguageDetector;
+use App\Core\Translation;
 
-$currentLanguage = App::getLanguage();
-
-
-// use App\Utils\Translation;
-// use App\Utils\LanguageDetector;
-// use App\Utils\Security;
-
-// use App\Controllers\AuthController;
-
-// // Detectar idioma pelo caminho da URL
-// $languageData = LanguageDetector::detectLanguage();
-// $currentLanguage; = $languageData['languages']; // 'pt' ou 'en'
-
-// Translation::init($currentLanguage;);
-
-// $authController = new AuthController();
-
-// // Verificar envio do formulário
-// if ($_SERVER["REQUEST_METHOD"] == "POST" && (isset($_POST['resend_activation']) && $_POST['resend_activation'] == 0)) {
-//     $authController->accessLogin($_POST);
-// }
-// if (isset($_GET['error'])) {
-//     $error = $_GET['error'];
-// }
-
-// if (isset($_GET['success'])) {
-//     $success = $_GET['success'];
-// }
-
-// if(isset($_POST['resend_activation']) && $_POST['resend_activation'] == 1)  {
-//     $authController->resendActivationEmail($_POST['email']);
-// }
-
-
-// Security::initializeSessionSecurity();
-
-
+$currentLanguage = LanguageDetector::detectLanguage()['language'];
 ?>
 
 
@@ -115,10 +80,10 @@ $currentLanguage = App::getLanguage();
                         <div class="text-center mt-3">
                             <div class="row">
                                 <div class="col">
-                                    <a href="/<?= $currentLanguage; ?>/forgot-password.php" class="text-decoration-none"><?= _('Esqueceu sua senha?') ?></a>
+                                    <a href="/<?= $currentLanguage; ?>/forgot-password" class="text-decoration-none"><?= _('Esqueceu sua senha?') ?></a>
                                 </div>
                                 <div class="col">
-                                    <a href="/<?= $currentLanguage; ?>/register.php" class="text-decoration-none"><?= _('Registrar novo usuário') ?></a>
+                                    <a href="/<?= $currentLanguage; ?>/register" class="text-decoration-none"><?= _('Registrar novo usuário') ?></a>
                                 </div>
                             </div>
                         </div>
@@ -128,8 +93,8 @@ $currentLanguage = App::getLanguage();
         </div>
     </div>
 
-    <!-- Bootstrap JS Bundle via jsDelivr -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Rodapé -->
+    <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
     <script src="../../../../public/assets/js/float-script.js"></script>
 </body>
 

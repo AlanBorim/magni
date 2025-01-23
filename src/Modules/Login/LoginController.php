@@ -99,4 +99,14 @@ class LoginController
         header("Location: /{$language}/");
         exit;
     }
+
+    public function forgotPassword()
+    {
+        include __DIR__ . '/views/forgot-password.php';
+    }
+
+    public function register()
+    {
+        include __DIR__ . '/views/register.php';
+    }
 }

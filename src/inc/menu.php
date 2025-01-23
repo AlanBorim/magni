@@ -1,13 +1,15 @@
 <?php
 
-$currentLanguage = $_SESSION['language'] ?? 'pt';
+use App\Core\LanguageDetector;
+
+$currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 ?>
 <nav class="navbar navbar-expand-lg">
     <div class="container-fluid">
         <!-- Substituindo "Dashboard" pelo logo -->
         <a class="navbar-brand" href="/dashboard">
-            <img src="/public/assets/images/logo.png" alt="Logo" style="height: 60px;">
+            <img src="../../public/assets/images/logo.png" alt="Logo" style="height: 60px;">
         </a>
 
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
