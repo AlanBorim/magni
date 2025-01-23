@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Permitir acesso direto a arquivos e diretórios existentes
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirecionar todas as requisições restantes para index.php, mantendo o método HTTP original
+RewriteRule ^ index.php [QSA,L]

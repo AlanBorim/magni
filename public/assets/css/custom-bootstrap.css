@@ -1,0 +1,160 @@
+:root {
+    /* Cores primárias */
+    --bs-primary: #007bff; /* Azul Bootstrap */
+    --bs-secondary: #6c757d; /* Cinza */
+    --bs-success: #28a745; /* Verde */
+    --bs-danger: #dc3545; /* Vermelho */
+    --bs-warning: #ffc107; /* Amarelo */
+    --bs-info: #17a2b8; /* Azul claro */
+    --bs-light: #f8f9fa; /* Branco claro */
+    --bs-dark: #343a40; /* Preto */
+    
+    /* Modo Claro */
+    --bs-body-bg: #ffffff;
+    --bs-body-color: #212529;
+    --bs-card-bg: #f8f9fa;
+    --bs-card-border-color: #ddd;
+    --bs-card-text-color: #212529;
+    --navbar-light-bg: #f8f9fa;
+    --navbar-light-color: #212529;
+
+    /* Links */
+    --bs-link-color: var(--bs-primary);
+    --bs-link-hover-color: #0056b3;
+
+    /* Botões */
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-color: #ffffff;
+    --bs-btn-border-color: var(--bs-primary);
+}
+
+[data-bs-theme="dark"] {
+    /* Modo Escuro */
+    --bs-body-bg: #212529;
+    --bs-body-color: #f8f9fa;
+    --bs-card-bg: #343a40;
+    --bs-card-border-color: #444;
+    --bs-card-text-color: #f8f9fa;
+    --navbar-dark-bg: #343a40;
+    --navbar-dark-color: #f8f9fa;
+
+    /* Links */
+    --bs-link-color: #79c0ff;
+    --bs-link-hover-color: #58a6ff;
+
+    /* Botões */
+    --bs-btn-bg: #495057;
+    --bs-btn-color: #f8f9fa;
+    --bs-btn-border-color: #6c757d;
+}
+
+body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.content {
+    flex: 1;
+}
+
+.footer {
+    background-color: #fdad00;
+    padding: 10px 0;
+}
+
+.navbar {
+    background-color: var(--navbar-light-bg);
+    color: var(--navbar-light-color);
+}
+
+.navbar[data-bs-theme="dark"] {
+    background-color: var(--navbar-dark-bg);
+    color: var(--navbar-dark-color)!important;
+}
+
+.navbar .nav-link {
+    color: inherit;
+}
+
+.navbar .nav-link:hover {
+    color: var(--bs-link-hover-color);
+}
+
+.card {
+    background-color: var(--bs-card-bg);
+    border-color: var(--bs-card-border-color);
+    color: var(--bs-card-text-color);
+}
+
+button.btn-primary, a.btn-primary {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+    border-color: var(--bs-btn-border-color);
+}
+
+button.btn-primary:hover, a.btn-primary:hover {
+    background-color: #ffc107; /* Destaque para hover */
+    color: #212529;
+}
+
+.form-check-label {
+    color: inherit;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: hidden !important;
+}
+
+.modal-lg {
+    max-width: 90%;
+    margin: auto;
+}
+.modal-body {
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+}
+
+
+.container {
+    max-width: 1280px;
+    margin: auto;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+form input {
+    margin-bottom: 10px;
+}
+
+.iti {
+    display: flex!important;
+}
+
+button.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+button.btn i {
+    width: 20px; /* Ajusta o tamanho do ícone */
+    height: 20px;
+    display: block; /* Garante o comportamento de bloco para ícones */
+}

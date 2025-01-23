@@ -1,0 +1,53 @@
+  
+  .container-float {
+    perspective: 200px;
+  }
+  
+  .image-wrapper {
+    position: relative;
+    transform-style: preserve-3d;
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  img {
+    
+    border-radius: 95px;
+    box-shadow: 0 20px 30px rgba(0, 0, 0, 0.3);
+    transform-origin: center;
+  }
+  
+  .shadow {
+    position: absolute;
+    bottom: -30px;
+    left: 50%;
+    width: 500px;
+    height: 20px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 50%;
+    filter: blur(10px);
+    transform: translateX(-50%);
+    animation: shadow-float 4s ease-in-out infinite;
+  }
+  
+  /* Animação do flutuar */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+    }
+    50% {
+      transform: translateY(-20px) rotateX(5deg) rotateY(5deg);
+    }
+  }
+  
+  /* Animação da sombra */
+  @keyframes shadow-float {
+    0%, 100% {
+      transform: translateX(-50%) scaleX(1);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateX(-50%) scaleX(1.2);
+      opacity: 0.7;
+    }
+  }
+  

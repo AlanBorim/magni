@@ -1,0 +1,264 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.4\n"
+
+msgid "Menu profile"
+msgstr "Perfil"
+
+msgid "Menu config"
+msgstr "Configurações"
+
+msgid "Menu out"
+msgstr "Sair"
+
+msgid "Rodape"
+msgstr "Apoio19 © - Todos os direitos reservados."
+
+msgid "Bem-vindo"
+msgstr "Bem-vindo"
+
+msgid "E-mail:"
+msgstr "E-mail:"
+
+msgid "Senha:"
+msgstr "Senha:"
+
+msgid "Entrar"
+msgstr "Entrar"
+
+msgid "Esqueceu sua senha?"
+msgstr "Esqueceu sua senha?"
+
+msgid "Registrar novo usuário"
+msgstr "Registrar novo usuário"
+
+msgid "Erro ao autenticar, verifique suas credenciais."
+msgstr "Erro ao autenticar, verifique suas credenciais."
+
+msgid "Twofa title"
+msgstr "Verificação de 2 Fatores"
+
+msgid "Twofa subtitle"
+msgstr "Código de Verificação:"
+
+msgid "Twofa placeholder"
+msgstr "Digite o código de 6 dígitos"
+
+msgid "Twofa button"
+msgstr "Verificar"
+
+msgid "Twofa error"
+msgstr "Código 2FA inválido. Tente novamente."
+
+msgid "Twofa out link"
+msgstr "Sair da conta"
+
+msgid "Recover title"
+msgstr "Recuperar Senha"
+
+msgid "Recover Link"
+msgstr "Enviar Link"
+
+msgid "Recover back"
+msgstr "Voltar para o Login"
+
+msgid "Recover success"
+msgstr "Um link de redefinição foi enviado para o seu e-mail."
+
+msgid "Recover error"
+msgstr "E-mail não encontrado!"
+
+msgid "Recover errorMail"
+msgstr "Falha ao enviar o e-mail. Tente novamente mais tarde."
+
+msgid "Register title"
+msgstr "Criar uma Conta"
+
+msgid "Register name"
+msgstr "Nome"
+
+msgid "Register password"
+msgstr "Senha:"
+
+msgid "Register confirm password"
+msgstr "Confirmar Senha"
+
+msgid "Register button"
+msgstr "Registrar"
+
+msgid "Register back"
+msgstr "Já tem uma conta? Faça login"
+
+msgid "Register success"
+msgstr "Conta criada com sucesso."
+
+msgid "Register error"
+msgstr "Erro ao criar a conta: "
+
+msgid "Register errorAccount"
+msgstr "E-mail já está registrado."
+
+msgid "Dash welcome"
+msgstr "Bem-vindo à Dashboard"
+
+msgid "Dash permission"
+msgstr "Seu nível de permissão é:"
+
+msgid "Dash permission desc"
+msgstr "Você tem permissões de administrador."
+
+msgid "Dash permission client"
+msgstr "Você tem permissões limitadas."
+
+msgid "Dash 2fa"
+msgstr "Você ainda não habilitou a autenticação de dois fatores (2FA)."
+
+msgid "Dash 2fa button"
+msgstr "Habilitar 2FA"
+
+msgid "Dash Attention"
+msgstr "Atenção!"
+
+msgid "Dash user"
+msgstr "Usuários"
+
+msgid "Dash user desc"
+msgstr "Gerencie os usuários do sistema."
+
+msgid "Dash clients"
+msgstr "Empresas"
+
+msgid "Dash clients desc"
+msgstr "Gerencie as empresas cadastradas."
+
+msgid "Dash modules"
+msgstr "Módulos Adicionais"
+
+msgid "Dash modules desc"
+msgstr "Configure os módulos adicionais do sistema."
+
+msgid "Dash button"
+msgstr "Acessar"
+
+msgid "Profile title"
+msgstr "Perfil do Usuário"
+
+msgid "Profile menu personal"
+msgstr "Dados Pessoais"
+
+msgid "Profile menu password"
+msgstr "Alterar Senha"
+
+msgid "Profile menu settings"
+msgstr "Preferências"
+
+msgid "Profile form nome"
+msgstr "Nome"
+
+msgid "Profile form email"
+msgstr "E-mail"
+
+msgid "Profile form phone"
+msgstr "Telefone"
+
+msgid "Profile form permissions"
+msgstr "Permissões"
+
+msgid "Profile form button"
+msgstr "Salvar Alterações"
+
+msgid "Profile form placeholder"
+msgstr "Selecione..."
+
+msgid "Profile form empty"
+msgstr "Nenhuma permissão disponível"
+
+msgid "Profile picture button"
+msgstr "Alterar Foto"
+
+msgid "Profile additional info"
+msgstr "Informações Adicionais"
+
+msgid "Profile last login"
+msgstr "Último login"
+
+msgid "Profile status"
+msgstr "Status"
+
+msgid "Profile status active"
+msgstr "Ativo"
+
+msgid "Profile status inactive"
+msgstr "Inativo"
+
+msgid "Profile current pass"
+msgstr "Senha Atual:"
+
+msgid "Profile new pass"
+msgstr "Nova Senha:"
+
+msgid "Profile confirm pass"
+msgstr "Confirmar a Nova Senha"
+
+msgid "Profile pass button"
+msgstr "Alterar Senha"
+
+msgid "Profile settings email"
+msgstr "Receber notificações por e-mail"
+
+msgid "Profile settings 2fa"
+msgstr "2FA Habilitado"
+
+msgid "Profile dark mode"
+msgstr "Ativar modo escuro"
+
+msgid "Profile dark mode inactive"
+msgstr "Disable dark mode"
+
+msgid "Profile settings button"
+msgstr "Salvar Preferências"
+
+msgid "Profile modal title"
+msgstr "Selecionar Nova Foto:"
+
+msgid "Profile modal form"
+msgstr "Selecionar Nova Foto:"
+
+msgid "Profile modal form cancel"
+msgstr "Cancelar"
+
+msgid "Config 2fa title"
+msgstr "Configuração de Autenticação de Dois Fatores (2FA)"
+
+msgid "Config 2fa subtitle"
+msgstr "Melhore a segurança da sua conta"
+
+msgid "Config 2fa desc"
+msgstr "Baixe o aplicativo <strong>Google Authenticator</strong> na Google Play Store para gerar códigos de autenticação seguros."
+
+msgid "Config 2fa qr title"
+msgstr "Escaneie o código QR com o aplicativo <strong>Google Authenticator</strong>:"
+
+msgid "Config 2fa qr text"
+msgstr "Ou insira manualmente a chave secreta:"
+
+msgid "Config 2fa code validate"
+msgstr "Digite o código de 6 dígitos gerado pelo Google Authenticator:"
+
+msgid "Config 2fa button"
+msgstr "Habilitar 2FA"
+
+msgid "Users title"
+msgstr "Usuários Cadastrados"
+
+msgid "Users new user"
+msgstr "Cadastrar Novo Usuário"

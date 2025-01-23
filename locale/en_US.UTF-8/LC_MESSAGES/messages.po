@@ -1,0 +1,264 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.4\n"
+
+msgid "Menu profile"
+msgstr "Profile"
+
+msgid "Menu config"
+msgstr "Configurations"
+
+msgid "Menu out"
+msgstr "Log out"
+
+msgid "Rodape"
+msgstr "Apoio19 © - All rights reserved."
+
+msgid "Bem-vindo"
+msgstr "Welcome"
+
+msgid "E-mail:"
+msgstr "Email:"
+
+msgid "Senha:"
+msgstr "Password:"
+
+msgid "Entrar"
+msgstr "Log in"
+
+msgid "Esqueceu sua senha?"
+msgstr "Forgot your password?"
+
+msgid "Registrar novo usuário"
+msgstr "Register a new user"
+
+msgid "Erro ao autenticar, verifique suas credenciais."
+msgstr "Authentication error, please check your credentials."
+
+msgid "Twofa title"
+msgstr "2-Factor Verification"
+
+msgid "Twofa subtitle"
+msgstr "Verification Code:"
+
+msgid "Twofa placeholder"
+msgstr "Enter the 6-digit code"
+
+msgid "Twofa button"
+msgstr "Check"
+
+msgid "Twofa error"
+msgstr "Invalid 2FA code. Please try again."
+
+msgid "Twofa out link"
+msgstr "Log out "
+
+msgid "Recover title"
+msgstr "Recover Password"
+
+msgid "Recover Link"
+msgstr "Send Link"
+
+msgid "Recover back"
+msgstr "Back to Login"
+
+msgid "Recover success"
+msgstr "A redefinition link was sent to your email."
+
+msgid "Recover error"
+msgstr "Email not found!"
+
+msgid "Recover errorMail"
+msgstr "Failure to send email. Try again later."
+
+msgid "Register title"
+msgstr "Create an Account"
+
+msgid "Register name"
+msgstr "Name"
+
+msgid "Register password"
+msgstr "Password:"
+
+msgid "Register confirm password"
+msgstr "Confirm Password"
+
+msgid "Register button"
+msgstr "Register"
+
+msgid "Register back"
+msgstr "Already have an account? Log in"
+
+msgid "Register success"
+msgstr "Account created successfully."
+
+msgid "Register error"
+msgstr "Error creating account: "
+
+msgid "Register errorAccount"
+msgstr "Email already registered."
+
+msgid "Dash welcome"
+msgstr "Welcome to Dashboard"
+
+msgid "Dash permission"
+msgstr "Your permission level is:"
+
+msgid "Dash permission desc"
+msgstr "You have administration permissions."
+
+msgid "Dash permission client"
+msgstr "You have limited permissions."
+
+msgid "Dash 2fa"
+msgstr "You have not yet enabled two-factor authentication (2FA)."
+
+msgid "Dash 2fa button"
+msgstr "Enable 2FA"
+
+msgid "Dash Attention"
+msgstr "Attention!"
+
+msgid "Dash user"
+msgstr "Users"
+
+msgid "Dash user desc"
+msgstr "Manage system users."
+
+msgid "Dash clients"
+msgstr "Enterprises"
+
+msgid "Dash clients desc"
+msgstr "Manage registered Enterprises."
+
+msgid "Dash modules"
+msgstr "Additional Modules"
+
+msgid "Dash modules desc"
+msgstr "Configure additional system modules."
+
+msgid "Dash button"
+msgstr "Access"
+
+msgid "Profile title"
+msgstr "User Profile"
+
+msgid "Profile menu personal"
+msgstr "Personal Data"
+
+msgid "Profile menu password"
+msgstr "Change Password"
+
+msgid "Profile menu settings"
+msgstr "Preferences"
+
+msgid "Profile form nome"
+msgstr "Name"
+
+msgid "Profile form email"
+msgstr "Email"
+
+msgid "Profile form phone"
+msgstr "Phone number"
+
+msgid "Profile form permissions"
+msgstr "Permissions"
+
+msgid "Profile form button"
+msgstr "Save changes"
+
+msgid "Profile form placeholder"
+msgstr "Choose one..."
+
+msgid "Profile form empty"
+msgstr "No permission found"
+
+msgid "Profile picture button"
+msgstr "Change Profile Picture"
+
+msgid "Profile additional info"
+msgstr "Additional Informations"
+
+msgid "Profile last login"
+msgstr "Last login"
+
+msgid "Profile status"
+msgstr "Status"
+
+msgid "Profile status active"
+msgstr "Active"
+
+msgid "Profile status inactive"
+msgstr "Inactive"
+
+msgid "Profile current pass"
+msgstr "Current Password:"
+
+msgid "Profile new pass"
+msgstr "New Password:"
+
+msgid "Profile confirm pass"
+msgstr "Confirm New Password:"
+
+msgid "Profile pass button"
+msgstr "Change password"
+
+msgid "Profile settings email"
+msgstr "Receive email notifications"
+
+msgid "Profile settings 2fa"
+msgstr "2FA Enabled"
+
+msgid "Profile dark mode"
+msgstr "Enable dark mode"
+
+msgid "Profile dark mode inactive"
+msgstr "Disable dark mode"
+
+msgid "Profile settings button"
+msgstr "Save Preferences"
+
+msgid "Profile modal title"
+msgstr "Change profile picture"
+
+msgid "Profile modal form"
+msgstr "Select new profile picture:"
+
+msgid "Profile modal form cancel"
+msgstr "Cancel"
+
+msgid "Config 2fa title"
+msgstr "Setting Up Two-Factor Authentication (2FA)"
+
+msgid "Config 2fa subtitle"
+msgstr "Improve your account security"
+
+msgid "Config 2fa desc"
+msgstr "Improve your account securityDownload the <strong>Google Authenticator</strong> app from the Google Play Store to generate secure authentication codes."
+
+msgid "Config 2fa qr title"
+msgstr "Scan the QR code with the <strong>Google Authenticator</strong> app:"
+
+msgid "Config 2fa qr text"
+msgstr "Or manually enter the secret key:"
+
+msgid "Config 2fa code validate"
+msgstr "Enter the 6-digit code generated by Google Authenticator:"
+
+msgid "Config 2fa button"
+msgstr "Enable 2FA"
+
+msgid "Users title"
+msgstr "Registered Users"
+
+msgid "Users new user"
+msgstr "Register New User"
