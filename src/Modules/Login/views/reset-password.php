@@ -1,0 +1,88 @@
+<?php
+
+require_once __DIR__ . '/../../../../vendor/autoload.php';
+
+use App\Core\FlashMessages;
+use App\Core\ViewHelper;
+use App\Core\LanguageDetector;
+
+$currentLanguage = LanguageDetector::detectLanguage()['language'];
+
+
+$error = FlashMessages::getFlash('forgot_password_error');
+$success = FlashMessages::getFlash('forgot_password_success');
+
+?>
+<!DOCTYPE html>
+<html lang="<?= $locale ?>">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redefinir Senha</title>
+    <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
+    <link href="../../../../public/assets/css/float-style.css" rel="stylesheet">
+
+</head>
+
+<body>
+    <div class="container-fluid vh-100">
+        <div class="row h-100">
+            <!-- Coluna da esquerda (Logo) -->
+            <div class="col-md-6 d-flex justify-content-center align-items-center" style="background: linear-gradient(90deg, #818181, #ffffff);">
+                <div class="container-float">
+                    <div class="image-wrapper">
+                        <img src="../../../../public/assets/images/logo.png" alt="Logo" class="img-fluid">
+                        <div class="shadow"></div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- Coluna da direita (Formulário de Registro) -->
+            <div class="col-md-6 d-flex justify-content-center align-items-center">
+                <div class="w-75">
+                    <h3 class="text-center">Redefinir Senha</h3>
+
+                    <?php if (!empty($successMessage)): ?>
+                        <div class="alert alert-success">
+                            <?php echo htmlspecialchars($successMessage); ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($errors)): ?>
+                        <div class="alert alert-danger">
+                            <ul>
+                                <?php foreach ($errors as $error): ?>
+                                    <li><?php echo htmlspecialchars($error); ?></li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+
+                    <form method="POST" action="/reset-password.php?token=<?php echo htmlspecialchars($token); ?>">
+                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+
+                        <div class="form-group mb-3">
+                            <label for="password">Nova Senha:</label>
+                            <input type="password" id="password" name="password" class="form-control" required>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="confirm_password">Confirmar Nova Senha:</label>
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Redefinir Senha</button>
+                        <div class="text-center mt-3">
+                            <a href="/login.php" class="text-decoration-none">Voltar para o Login</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- Rodapé -->
+        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
+        <script src="../../../../public/assets/js/float-script.js"></script>
+</body>
+
+</html>

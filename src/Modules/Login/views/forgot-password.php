@@ -2,27 +2,15 @@
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-
+use App\Core\FlashMessages;
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
-// Translation::init(LanguageDetector::detectLanguage()['language']);
-// use App\Controllers\ForgotPasswordController;
-// use App\Utils\Translation;
-// use App\Utils\LanguageDetector;
 
-// // Detectar idioma pelo caminho da URL
-// $languageData = LanguageDetector::detectLanguage();
-// $locale = $languageData['languages']; // 'pt' ou 'en'
 
-// Translation::init($locale);
-
-// if (isset($_POST['submit']) && $_POST['submit'] == 1) {
-//     // Inicia o controlador de recuperação de senha
-//     $controller = new ForgotPasswordController();
-//     $result = $controller->processForgotPassword();
-// }
+$error = FlashMessages::getFlash('forgot_password_error');
+$success = FlashMessages::getFlash('forgot_password_success');
 
 ?>
 
@@ -62,17 +50,17 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center"><?= _('Recover title') ?></h3>
-                        <?php if (isset($result) && !empty($result) && $result['status'] === true): ?>
+                        <?php if (isset($success) && !empty($success)): ?>
                             <div class="alert alert-success">
-                                <?php echo $result[_('Recover title')] . '<br>'; ?>
+                                <?php echo $success . '<br>'; ?>
                             </div>
                         <?php endif; ?>
-                        <?php if (isset($result) && !empty($result) && $result['status'] === false): ?>
+                        <?php if (isset($error) && !empty($error)): ?>
                             <div class="alert alert-danger">
-                                <?php echo $result[_('Recover error')] ?? $result[_('Recover errorMail')] . '<br>'; ?>
+                                <?php echo $error; ?>
                             </div>
                         <?php endif; ?>
-                        <form method="POST" action="">
+                        <form method="POST" action="/<?= $currentLanguage ?>/forgotPassword">
                             <div class="form-group">
                                 <label for="email"><?= _('E-mail:') ?></label>
                                 <input type="email" id="email" name="email" class="form-control" required>

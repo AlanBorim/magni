@@ -3,7 +3,7 @@
 namespace App\Modules\Login;
 
 use App\Core\Database;
-
+use PDO;
 class LoginService
 {
     public function validateUser($email, $password)
@@ -38,4 +38,49 @@ class LoginService
 
         return $user && $user['two_factor_secret'] === $code;
     }
+
+    public function findByEmail($email)
+    {
+        $db = Database::getInstance();
+
+        $stmt = $db->prepare("SELECT * FROM users WHERE email = :email");
+        $stmt->execute(['email' => $email]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            return $user;
+        }
+
+        return null;
+    }
+
+    public function insertResetToken(string $token, int $userId): bool
+    {
+        $db = Database::getInstance();
+        $expireTime = date('Y-m-d H:i:s', strtotime('+1 hour')); // Expira em 1 hora
+
+        // Salva o token no banco de dados
+        $stmt = $db->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (:user_id, :token, :expires_at)");
+        $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
+        $stmt->bindParam(':token', $token, PDO::PARAM_STR);
+        $stmt->bindParam(':expires_at', $expireTime, PDO::PARAM_STR);
+        if($stmt->execute()){
+            return true;
+        }
+
+        return false;
+    }
+
+    public function findByResetToken(string $token): bool
+    {
+        $db = Database::getInstance();
+
+        // Verifica se o token é válido e não expirou
+        $stmt = $db->prepare('SELECT token FROM password_resets WHERE token = :token AND expires_at > NOW()');
+        $stmt->execute(['token' => $token]);
+        $row = $stmt->fetch();
+
+        return (bool) $row; // Retorna true se o token for válido, false caso contrário
+    }
+
 }

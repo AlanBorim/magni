@@ -5,9 +5,12 @@ use App\Modules\Login\LoginController;
 // Definição das rotas para o módulo Login
 $router->get('/', [LoginController::class, 'showLogin']);          // home e tela de login
 $router->get('/logout', [LoginController::class, 'logout']);       // logout sistema
-$router->get('/dashboard', [LoginController::class, 'dashboard']); // dashboard
-$router->get('/forgot-password', [LoginController::class,'forgotPassword']); // recuperar senha
-$router->get('/register', [LoginController::class,'register']); // recuperar senha
+$router->get('/dashboard', [LoginController::class, 'showDashboard']); // dashboard
+$router->get('/forgot-password', [LoginController::class,'showForgotPassword']); // recuperar senha
+$router->get('/register', [LoginController::class,'showRegister']); // recuperar senha
+$router->get('/reset-password', [LoginController::class, 'showResetPasswordForm']);
 
 // Definição das rotas para o módulo login método post
 $router->post('/login', [LoginController::class, 'processLogin']); // processo de envio das informações para o login
+$router->post('/forgotPassword', [LoginController::class, 'processForgotPassword']); // processo de envio do reset da senha
+$router->post('/reset-password', [LoginController::class, 'processResetPassword']);
