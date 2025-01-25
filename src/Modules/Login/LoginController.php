@@ -6,7 +6,12 @@ use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
 use App\Core\TokenGenerator;
 use App\Core\MailService;
+
+use App\Core\Validations;
+
 use App\Modules\Login\LoginService;
+
+use Exception;
 
 class LoginController
 {
@@ -44,53 +49,108 @@ class LoginController
 
     public function showResetPasswordForm()
     {
-        $token = $_GET['token'] ?? null;
-        
-        if (!$token) {
-            echo "Token inválido ou ausente.";
-            return;
+        if (!isset($_REQUEST['ok']) || $_REQUEST['ok'] != true) {
+            $currentLanguage = LanguageDetector::detectLanguage()['language'];
+            $token = $_REQUEST['token'] ?? null;
+
+            if (!$token) {
+
+                FlashMessages::setFlash('forgot_password_token_not_present', 'Token inválido ou ausente.');
+                header("Location: /{$currentLanguage}/reset-password");
+                return;
+            }
+
+            $loginService = new LoginService();
+
+            // Verifique se o token é válido e não expirou
+            $user = $loginService->findByResetToken($token);
+
+            if (!$user) {
+                FlashMessages::setFlash('forgot_password_token_expired', 'Token inválido ou ausente.');
+                header("Location: /{$currentLanguage}/reset-password");
+                return;
+            }
         }
-    
-        $loginService = new LoginService();
-    
-        // Verifique se o token é válido e não expirou
-        $user = $loginService->findByResetToken($token);
-    
-        if (!$user) {
-            echo "Token inválido ou expirado.";
-            return;
-        }
-    
+
         // Renderize o formulário de redefinição de senha
         include __DIR__ . '/views/reset-password.php';
+    }
+
+    public function processResetPassword()
+    {
+
+        $validator = new Validations();
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+        $resetData = new LoginService();
+        $errors = [];
+
+        $token = $_REQUEST['token'] ?? null;
+        $password = $_REQUEST['password'] ?? null;
+        $confirmPassword = $_REQUEST['confirm_password'] ?? null;
+
+        if (!$token) {
+            FlashMessages::setFlash('forgot_password_invalid_token', 'Token não fornecido!');
+            header("Location: /{$currentLanguage}/");
+            return;
+        }
+
+        if (!$resetData->findByResetToken($token)) {
+            FlashMessages::setFlash('forgot_password_invalid_token', 'Token inválido ou expirado.');
+            header("Location: /{$currentLanguage}/");
+            return;
+        }
+
+
+
+        // Validação dos campos de senha
+        $errors = $validator->validatePasswordReset($password, $confirmPassword);
+
+        if (empty($errors)) {
+            try {
+                // Tenta redefinir a senha usando o serviço
+                $resetData->resetPassword($token, $password);
+
+                FlashMessages::setFlash('forgot_password_reset_success', 'Senha redefinida com sucesso. Você já pode fazer login.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            } catch (Exception $e) {
+
+                FlashMessages::setFlash('forgot_password_reset_error', 'Ocorreu um erro' . $e->getMessage());
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+        }
     }
 
     public function processForgotPassword()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
+            $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
             $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
 
             if (!$email) {
-                $this->message[] = "E-mail inválido!";
-                return $this->message;
+                FlashMessages::setFlash('forgot_password_invalid_mail', 'E-mail inválido!');
+                header("Location: /{$currentLanguage}/forgot-password");
+                return;
             }
 
             $user = new LoginService();
             $userData = $user->findByEmail($email);
             if (!$userData) {
-                $this->error['status'] = false;
-                $this->error['message'] = "E-mail não encontrado!";
-                return $this->error;
+                FlashMessages::setFlash('forgot_password_mail_not_found', 'E-mail não encontrado');
+                header("Location: /{$currentLanguage}/forgot-password");
+                return;
             }
 
             // Gera um token único para redefinição de senha
             $token = TokenGenerator::generate();
 
-            $user->insertResetToken($token, $userData['id']);
-
-            $currentLanguage = LanguageDetector::detectLanguage()['language'];
+            if (!$user->insertResetToken($token, $userData['id'])) {
+                FlashMessages::setFlash('forgot_password_token_not_inserted', 'Impossível criar token de redefinição de senha!');
+                header("Location: /{$currentLanguage}/forgot-password");
+                return;
+            }
 
             // Envia o e-mail com o link de redefinição
             $resetLink = "https://magni.apoio19.com.br/{$currentLanguage}/reset-password?token=$token";

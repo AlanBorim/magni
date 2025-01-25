@@ -8,6 +8,7 @@ use App\Core\LanguageDetector;
 use App\Core\Translation;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
+
 ?>
 
 

@@ -11,10 +11,10 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 $error = FlashMessages::getFlash('forgot_password_error');
 $success = FlashMessages::getFlash('forgot_password_success');
-
+var_dump($_SESSION['flash']);
 ?>
 <!DOCTYPE html>
-<html lang="<?= $locale ?>">
+<html lang="<?= $currentLanguage ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -39,50 +39,59 @@ $success = FlashMessages::getFlash('forgot_password_success');
 
             </div>
             <!-- Coluna da direita (Formulário de Registro) -->
-            <div class="col-md-6 d-flex justify-content-center align-items-center">
-                <div class="w-75">
-                    <h3 class="text-center">Redefinir Senha</h3>
+            <div class="col-md-6 d-flex flex-column">
+                <!-- Barra de seleção de idioma -->
+                <div class="w-100 py-2 border-bottom text-end">
+                    <a href="/pt/reset-password?token=<?php echo htmlspecialchars($token); ?>"><img src="../../../../public/assets/images/flags/pt.png" alt="Português" title="Português" width="20" height="20"></a>
+                    <a href="/en/reset-password?token=<?php echo htmlspecialchars($token); ?>" class="me-2"><img src="../../../../public/assets/images/flags/en.png" alt="English" title="English" width="20" height="20"></a>
+                </div>
 
-                    <?php if (!empty($successMessage)): ?>
-                        <div class="alert alert-success">
-                            <?php echo htmlspecialchars($successMessage); ?>
-                        </div>
-                    <?php endif; ?>
+                <div class="d-flex justify-content-center align-items-center flex-grow-1">
+                    <div class="w-75">
+                        <h3 class="text-center">Redefinir Senha</h3>
 
-                    <?php if (!empty($errors)): ?>
-                        <div class="alert alert-danger">
-                            <ul>
-                                <?php foreach ($errors as $error): ?>
-                                    <li><?php echo htmlspecialchars($error); ?></li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
+                        <?php if (!empty($successMessage)): ?>
+                            <div class="alert alert-success">
+                                <?php echo htmlspecialchars($successMessage); ?>
+                            </div>
+                        <?php endif; ?>
 
-                    <form method="POST" action="/reset-password.php?token=<?php echo htmlspecialchars($token); ?>">
-                        <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
+                        <?php if (!empty($errors)): ?>
+                            <div class="alert alert-danger">
+                                <ul>
+                                    <?php foreach ($errors as $error): ?>
+                                        <li><?php echo htmlspecialchars($error); ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
+                        <?php endif; ?>
 
-                        <div class="form-group mb-3">
-                            <label for="password">Nova Senha:</label>
-                            <input type="password" id="password" name="password" class="form-control" required>
-                        </div>
+                        <form method="POST" action="/<?= $currentLanguage ?>/reset-password">
+                            <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
 
-                        <div class="form-group mb-3">
-                            <label for="confirm_password">Confirmar Nova Senha:</label>
-                            <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
-                        </div>
+                            <div class="form-group mb-3">
+                                <label for="password">Nova Senha:</label>
+                                <input type="password" id="password" name="password" class="form-control" required>
+                            </div>
 
-                        <button type="submit" class="btn btn-primary w-100">Redefinir Senha</button>
-                        <div class="text-center mt-3">
-                            <a href="/login.php" class="text-decoration-none">Voltar para o Login</a>
-                        </div>
-                    </form>
+                            <div class="form-group mb-3">
+                                <label for="confirm_password">Confirmar Nova Senha:</label>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100">Redefinir Senha</button>
+                            <div class="text-center mt-3">
+                                <a href="/<?= $currentLanguage ?>/" class="text-decoration-none">Voltar para o Login</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-        <!-- Rodapé -->
-        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
-        <script src="../../../../public/assets/js/float-script.js"></script>
+    </div>
+    <!-- Rodapé -->
+    <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
+    <script src="../../../../public/assets/js/float-script.js"></script>
 </body>
 
 </html>

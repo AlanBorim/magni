@@ -8,6 +8,10 @@ class Validations
     {
         $errors = [];
 
+        if (empty($password)) {
+            $errors[] = 'A senha está vazia.';
+        }
+
         if (strlen($password) < 8) {
             $errors[] = 'A senha deve ter pelo menos 8 caracteres.';
         }
