@@ -51,7 +51,7 @@ class LoginController
         $token = $_REQUEST['token'] ?? null;
 
         if (!$token) {
-            FlashMessages::setFlash('error', 'forgot_password_token_not_present', 'Token inválido ou ausente.');
+            FlashMessages::setFlash('danger', 'forgot_password_token_not_present', 'Token inválido ou ausente.');
         }
 
         $loginService = new LoginService();
@@ -60,7 +60,7 @@ class LoginController
         $user = $loginService->findByResetToken($token);
 
         if (!$user) {
-            FlashMessages::setFlash('error', 'forgot_password_token_expired', 'Token inválido ou ausente.');
+            FlashMessages::setFlash('danger', 'forgot_password_token_expired', 'Token inválido ou ausente.');
         }
 
         // Renderize o formulário de redefinição de senha
@@ -84,33 +84,33 @@ class LoginController
         $confirmPassword = $_REQUEST['confirm_password'] ?? null;
 
         if (!$token) {
-            FlashMessages::setFlash('error', 'forgot_password_invalid_token', 'Token não fornecido!');
+            FlashMessages::setFlash('danger', 'forgot_password_invalid_token', 'Token não fornecido!');
             header("Location: /{$currentLanguage}/");
             return;
         }
 
         if (!$resetData->findByResetToken($token)) {
-            FlashMessages::setFlash('error', 'forgot_password_invalid_token', 'Token inválido ou expirado.');
+            FlashMessages::setFlash('danger', 'forgot_password_invalid_token', 'Token inválido ou expirado.');
             header("Location: /{$currentLanguage}/");
             return;
         }
 
         if (empty($password)) {
-            FlashMessages::setFlash('error', 'general', 'A senha está vazia.');
+            FlashMessages::setFlash('danger', 'general', 'A senha está vazia.');
             // Redireciona para a página de redefinição com o token intacto
             header("Location: /{$currentLanguage}/reset-password?token=$token");
             return;
         }
 
         if (strlen($password) < 8) {
-            FlashMessages::setFlash('error', 'general', 'A senha deve ter pelo menos 8 caracteres.');
+            FlashMessages::setFlash('danger', 'general', 'A senha deve ter pelo menos 8 caracteres.');
             // Redireciona para a página de redefinição com o token intacto
             header("Location: /{$currentLanguage}/reset-password?token=$token");
             return;
         }
 
         if ($password !== $confirmPassword) {
-            FlashMessages::setFlash('error', 'general', 'As senhas não coincidem.');
+            FlashMessages::setFlash('danger', 'general', 'As senhas não coincidem.');
             // Redireciona para a página de redefinição com o token intacto
             header("Location: /{$currentLanguage}/reset-password?token=$token");
             return;
@@ -124,7 +124,7 @@ class LoginController
             header("Location: /{$currentLanguage}/");
             return;
         } catch (Exception $e) {
-            FlashMessages::setFlash('error', 'change_error', 'Ocorreu um erro ao redefinir a senha: ' . $e->getMessage());
+            FlashMessages::setFlash('danger', 'change_error', 'Ocorreu um erro ao redefinir a senha: ' . $e->getMessage());
             header("Location: /{$currentLanguage}/reset-password?token=$token");
             return;
         }
@@ -138,7 +138,7 @@ class LoginController
             $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
 
             if (!$email) {
-                FlashMessages::setFlash('error', 'forgot_password_invalid_mail', 'E-mail inválido!');
+                FlashMessages::setFlash('danger', 'forgot_password_invalid_mail', 'E-mail inválido!');
                 header("Location: /{$currentLanguage}/forgot-password");
                 return;
             }
@@ -146,7 +146,7 @@ class LoginController
             $user = new LoginService();
             $userData = $user->findByEmail($email);
             if (!$userData) {
-                FlashMessages::setFlash('error', 'forgot_password_mail_not_found', 'E-mail não encontrado');
+                FlashMessages::setFlash('danger', 'forgot_password_mail_not_found', 'E-mail não encontrado');
                 header("Location: /{$currentLanguage}/forgot-password");
                 return;
             }
@@ -155,13 +155,13 @@ class LoginController
             $token = TokenGenerator::generate();
 
             if (!$user->insertResetToken($token, $userData['id'])) {
-                FlashMessages::setFlash('error', 'forgot_password_token_not_inserted', 'Impossível criar token de redefinição de senha!');
+                FlashMessages::setFlash('danger', 'forgot_password_token_not_inserted', 'Impossível criar token de redefinição de senha!');
                 header("Location: /{$currentLanguage}/forgot-password");
                 return;
             }
 
             // Envia o e-mail com o link de redefinição
-            $resetLink = "https://magni.apoio19.com.br/{$currentLanguage}/reset-password?token=$token";
+            $resetLink = $_ENV['APP_URL'] . "/{$currentLanguage}/reset-password?token=$token";
             $subject = "Redefinição de senha";
             $message = "
                 <h3>Olá,</h3>
@@ -179,7 +179,7 @@ class LoginController
                 return;
             } else {
 
-                FlashMessages::setFlash('error', 'forgot_password_error', 'Falha ao enviar o e-mail. Tente novamente mais tarde.');
+                FlashMessages::setFlash('danger', 'forgot_password_error', 'Falha ao enviar o e-mail. Tente novamente mais tarde.');
                 header("Location: /{$currentLanguage}/forgot-password");
                 return;
             }
@@ -198,12 +198,18 @@ class LoginController
 
         if (!$user) {
 
-            FlashMessages::setFlash('error', 'access_error', 'Usuário ou senha inválidos.');
+            FlashMessages::setFlash('danger', 'access_error', 'Usuário ou senha inválidos.');
             header("Location: /{$currentLanguage}/");
             return;
         }
 
         self::initializeUserSession($user);
+
+        if ($user['activated'] == '0') {
+            FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou clique no botão para reenviar o link de ativação.');
+            header("Location: /{$currentLanguage}/");
+            return;
+        }
 
         // Verifica se o usuário possui 2FA habilitado
         if ($user['two_factor_enabled']) {
@@ -221,17 +227,17 @@ class LoginController
         session_start();
 
         $code = $_REQUEST['two_factor_code'] ?? '';
-        
+
         if (empty($code)) {
-            FlashMessages::setFlash('error', 'empty_2fa', 'Código 2FA vazio.');
+            FlashMessages::setFlash('danger', 'empty_2fa', 'Código 2FA vazio.');
             header("Location: /{$currentLanguage}/");
             return;
         }
 
         Security::startTwoFactorValidation($_SESSION['user_id'], $code);
-        
+
         if (!Security::validateTwoFactorCode($code)) {
-            FlashMessages::setFlash('error', 'invalid_2fa', 'Código 2FA inválido.');
+            FlashMessages::setFlash('danger', 'invalid_2fa', 'Código 2FA inválido.');
             header("Location: /{$currentLanguage}/two-factor-check");
             return;
         }
@@ -266,5 +272,45 @@ class LoginController
         // Redireciona o usuário para a página de login
         header("Location: /{$language}/");
         exit;
+    }
+    /**
+     * Undocumented function
+     *
+     * @param [type] $email
+     * @return void
+     */
+    public function resendActivationEmail()
+    {
+        $id = $_REQUEST['id'];
+
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+        $loginService = new LoginService();
+        $user = $loginService->findById($id);
+
+        if (isset($user['activation_token']) && $user['activation_token'] != '') {
+            // Reenvia o e-mail de ativação
+            $activationLink = $_ENV['APP_URL'] . "/activate.php?token=" . $user['activation_token'];
+            $message = "
+                <p>Olá, {$user['name']}!</p>
+                <p>Por favor, clique no link abaixo para ativar sua conta:</p>
+                <p><a href='{$activationLink}'>{$activationLink}</a></p>
+                <p>Se você não solicitou este e-mail, por favor ignore-o.</p>
+            ";
+
+            if (MailService::send($user['email'], 'Reenvio de Ativação da Conta', $message)) {
+                FlashMessages::setFlash('success', 'resent_activation_email', 'E-mail de ativação reenviado. Verifique sua caixa de entrada.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            } else {
+                FlashMessages::setFlash('danger', 'resent_activation_email_failure', 'Erro ao reenviar o e-mail de ativação. Tente novamente mais tarde.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+        } else {
+            FlashMessages::setFlash('danger', 'resent_activation_email_not_found', 'Falha ao localizar o token entre em contato com o suporte.');
+            header("Location: /{$currentLanguage}/");
+            return;
+
+        }
     }
 }

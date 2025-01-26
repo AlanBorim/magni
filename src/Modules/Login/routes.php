@@ -16,3 +16,4 @@ $router->post('/login', [LoginController::class, 'processLogin']); // processo d
 $router->post('/forgotPassword', [LoginController::class, 'processForgotPassword']); // processo de envio do reset da senha
 $router->post('/reset-password', [LoginController::class, 'processResetPassword']); // processo de reset de senha
 $router->post('/two-factor-check', [LoginController::class, 'process2fa']); // processo de validação de 2fa
+$router->post('/resendActivationEmail', [LoginController::class, 'resendActivationEmail']); // processo de validação de 2fa

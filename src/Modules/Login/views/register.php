@@ -45,21 +45,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _('Register title') ?></h3>
 
-                        <?php if ($successMessage): ?>
-                            <div class="alert alert-success">
-                                <?php echo $successMessage; ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if ($errors): ?>
-                            <div class="alert alert-danger">
-                                <ul>
-                                    <?php foreach ($errors as $error): ?>
-                                        <li style="color: red;"><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
+                        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');?>
                         <?php if (!$closeForm): ?>
                             <form method="POST" action="">
                                 <div class="form-group mb-3">

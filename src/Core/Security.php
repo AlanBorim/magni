@@ -18,7 +18,7 @@ class Security
         self::initializeSession();
         
         if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $userId) {
-            FlashMessages::setFlash('error', 'start_2fa_error', 'Ocorreu um erro no start 2fa');
+            FlashMessages::setFlash('danger', 'start_2fa_error', 'Ocorreu um erro no start 2fa');
             self::redirectTo('/');
         }
 

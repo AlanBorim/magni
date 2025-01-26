@@ -114,7 +114,7 @@ class LoginService
         $row = $stmt->fetch();
 
         if (!$row) {
-            FlashMessages::setFlash('error', 'invalid_token', 'Token inválido ou expirado.');
+            FlashMessages::setFlash('danger', 'invalid_token', 'Token inválido ou expirado.');
             header("Location: /{$currentLanguage}/reset-password");
             exit;
         }
@@ -125,7 +125,7 @@ class LoginService
         $updateStmt->execute(['password' => $hashedPassword, 'userId' => $row['id']]);
 
         if ($updateStmt->rowCount() === 0) {
-            FlashMessages::setFlash('error', 'password_change_error', 'Erro ao atualizar a senha. Tente novamente.');
+            FlashMessages::setFlash('danger', 'password_change_error', 'Erro ao atualizar a senha. Tente novamente.');
             header("Location: /{$currentLanguage}/reset-password?token=$token");
             exit;
         }

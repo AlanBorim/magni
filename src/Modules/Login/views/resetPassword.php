@@ -48,18 +48,7 @@ $messages = FlashMessages::getFlash();
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center">Redefinir Senha</h3>
-                        <?php var_dump($messages);?>
-                        <?php 
-                        // if (!empty($messages)){
-                        //      foreach ($messages as $type => $msgs){
-                        //         foreach ($msgs as $msg){
-                        //             <div class="alert alert- htmlspecialchars($type) ">
-                        //                 print_r($msg) 
-                        //             </div>
-                        //         }
-                        //         }
-                        //  } 
-                         ?>
+                        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');?>
 
                         <form method="POST" action="/<?= $currentLanguage ?>/reset-password">
                             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">

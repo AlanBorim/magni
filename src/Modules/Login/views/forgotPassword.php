@@ -48,18 +48,10 @@ $messages = FlashMessages::getFlash();
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center"><?= _('Recover title') ?></h3>
-                        <?php var_dump($messages);?>
-                        <?php 
-                        // if (!empty($messages)){
-                        //      foreach ($messages as $type => $msgs){
-                        //         foreach ($msgs as $msg){
-                        //             <div class="alert alert- htmlspecialchars($type) ">
-                        //                 print_r($msg) 
-                        //             </div>
-                        //         }
-                        //         }
-                        //  } 
-                         ?>
+
+                        <?php
+                        ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');
+                        ?>
                         <form method="POST" action="/<?= $currentLanguage ?>/forgotPassword">
                             <div class="form-group">
                                 <label for="email"><?= _('E-mail:') ?></label>
@@ -70,7 +62,7 @@ $messages = FlashMessages::getFlash();
                         </form>
 
                         <div class="text-center mt-3">
-                            <a href="/<?= $currentLanguage?>/" class="text-decoration-none"><?= _('Recover back') ?></a>
+                            <a href="/<?= $currentLanguage ?>/" class="text-decoration-none"><?= _('Recover back') ?></a>
                         </div>
                     </div>
                 </div>

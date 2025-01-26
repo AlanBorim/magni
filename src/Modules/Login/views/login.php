@@ -51,25 +51,21 @@ $messages = FlashMessages::getFlash();
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _('Bem-vindo') ?></h3>
-
-                        <?php var_dump($messages); ?>
                         <?php
-                        // if (!empty($messages)){
-                        //      foreach ($messages as $type => $msgs){
-                        //         foreach ($msgs as $msg){
-                        //             <div class="alert alert- htmlspecialchars($type) ">
-                        //                 print_r($msg) 
-                        //             </div>
-                        //         }
-                        //         }
-                        //  } 
-                        ?>
-                        <!-- <form action="" method="POST">
-                                        <button type="submit" class="btn btn-primary">Reenviar E-mail de Ativação</button>
-                                        <input type="hidden" name="resend_activation" value="1">
-                                        <input type="hidden" name="email" value="<?= base64_decode($_GET['cli']) ?>">
-                                    </form> -->
+                        ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');
 
+                        $resend = null;
+
+                        if ($resend == 1) {
+                        ?>
+                            <div class="text-center align-items-center flex-grow-1">
+                                <form method="POST" action="/<?= $currentLanguage; ?>/resendActivationEmail">
+                                    <button type="submit" class="btn btn-primary">Reenviar E-mail de Ativação</button>
+                                    <input type="hidden" name="resend_activation" value="1">
+                                    <input type="hidden" name="id" value="<?= $_SESSION['user_id'] ?>">
+                                </form>
+                            </div>
+                        <?php } ?>
                         <form method="POST" action="/<?= $currentLanguage; ?>/login">
                             <div class="mb-3">
                                 <label for="email" class="form-label"><?= _('E-mail:') ?></label>
