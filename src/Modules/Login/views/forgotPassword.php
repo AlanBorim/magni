@@ -8,9 +8,7 @@ use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-
-$error = FlashMessages::getFlash('forgot_password_error');
-$success = FlashMessages::getFlash('forgot_password_success');
+$messages = FlashMessages::getFlash();
 
 ?>
 
@@ -50,16 +48,18 @@ $success = FlashMessages::getFlash('forgot_password_success');
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center"><?= _('Recover title') ?></h3>
-                        <?php if (isset($success) && !empty($success)): ?>
-                            <div class="alert alert-success">
-                                <?php echo $success . '<br>'; ?>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (isset($error) && !empty($error)): ?>
-                            <div class="alert alert-danger">
-                                <?php echo $error; ?>
-                            </div>
-                        <?php endif; ?>
+                        <?php var_dump($messages);?>
+                        <?php 
+                        // if (!empty($messages)){
+                        //      foreach ($messages as $type => $msgs){
+                        //         foreach ($msgs as $msg){
+                        //             <div class="alert alert- htmlspecialchars($type) ">
+                        //                 print_r($msg) 
+                        //             </div>
+                        //         }
+                        //         }
+                        //  } 
+                         ?>
                         <form method="POST" action="/<?= $currentLanguage ?>/forgotPassword">
                             <div class="form-group">
                                 <label for="email"><?= _('E-mail:') ?></label>

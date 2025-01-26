@@ -3,12 +3,13 @@ ini_set('display_errors', '1');
 ini_set('display_startup_errors', '1');
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
+use App\Core\FlashMessages;
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
-use App\Core\Translation;
+
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
-
+$messages = FlashMessages::getFlash();
 ?>
 
 
@@ -21,7 +22,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
     <title><?= _('Login') ?></title>
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
     <link href="../../../../public/assets/css/float-style.css" rel="stylesheet">
-    
+
 </head>
 
 <body>
@@ -50,20 +51,24 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _('Bem-vindo') ?></h3>
-                        <?php if (isset($error)): ?>
-                            <div class="alert alert-danger text-center"><?= _($error) ?>
-                                <?php if (isset($_GET['error']) && strpos($_GET['error'], 'não ativada') !== false): ?>
-                                    <form action="" method="POST">
+
+                        <?php var_dump($messages); ?>
+                        <?php
+                        // if (!empty($messages)){
+                        //      foreach ($messages as $type => $msgs){
+                        //         foreach ($msgs as $msg){
+                        //             <div class="alert alert- htmlspecialchars($type) ">
+                        //                 print_r($msg) 
+                        //             </div>
+                        //         }
+                        //         }
+                        //  } 
+                        ?>
+                        <!-- <form action="" method="POST">
                                         <button type="submit" class="btn btn-primary">Reenviar E-mail de Ativação</button>
                                         <input type="hidden" name="resend_activation" value="1">
                                         <input type="hidden" name="email" value="<?= base64_decode($_GET['cli']) ?>">
-                                    </form>
-                                <?php endif; ?>
-                            </div>
-                        <?php endif; ?>
-                        <?php if (isset($success)): ?>
-                            <div class="alert alert-success text-center"><?= _($success) ?></div>
-                        <?php endif; ?>
+                                    </form> -->
 
                         <form method="POST" action="/<?= $currentLanguage; ?>/login">
                             <div class="mb-3">

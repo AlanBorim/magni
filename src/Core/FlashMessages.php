@@ -4,12 +4,14 @@ namespace App\Core;
 
 class FlashMessages
 {
-    public static function setFlash(string $type, string $message): void
+    public array $messages = [];
+    
+    public static function setFlash(string $type, string $var, string $message): void
     {
         if (!isset($_SESSION)) {
             session_start();
         }
-        $_SESSION['flash_messages'][$type][] = $message;
+        $_SESSION['flash_messages'][$type][$var][] = $message;
     }
 
     public static function getFlash(): array

@@ -1,5 +1,5 @@
 <?php
-
+ini_set('display_errors', '1');
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 use App\Core\FlashMessages;
@@ -9,10 +9,9 @@ use App\Core\LanguageDetector;
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 
-$error = FlashMessages::getFlash('forgot_password_error');
-$success = FlashMessages::getFlash('forgot_password_success');
-var_dump($_SESSION['flash']);
+$messages = FlashMessages::getFlash();
 ?>
+
 <!DOCTYPE html>
 <html lang="<?= $currentLanguage ?>">
 
@@ -49,22 +48,18 @@ var_dump($_SESSION['flash']);
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center">Redefinir Senha</h3>
-
-                        <?php if (!empty($successMessage)): ?>
-                            <div class="alert alert-success">
-                                <?php echo htmlspecialchars($successMessage); ?>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (!empty($errors)): ?>
-                            <div class="alert alert-danger">
-                                <ul>
-                                    <?php foreach ($errors as $error): ?>
-                                        <li><?php echo htmlspecialchars($error); ?></li>
-                                    <?php endforeach; ?>
-                                </ul>
-                            </div>
-                        <?php endif; ?>
+                        <?php var_dump($messages);?>
+                        <?php 
+                        // if (!empty($messages)){
+                        //      foreach ($messages as $type => $msgs){
+                        //         foreach ($msgs as $msg){
+                        //             <div class="alert alert- htmlspecialchars($type) ">
+                        //                 print_r($msg) 
+                        //             </div>
+                        //         }
+                        //         }
+                        //  } 
+                         ?>
 
                         <form method="POST" action="/<?= $currentLanguage ?>/reset-password">
                             <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">

@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Modules\Login\LoginService;
 use RobThree\Auth\TwoFactorAuth;
 
 class Security
@@ -10,22 +11,24 @@ class Security
      * Inicia a validação de 2FA para o usuário logado.
      *
      * @param string $userId ID do usuário logado.
-     * @param string|null $twoFactorSecret Chave secreta do 2FA ou null se não habilitado.
+     * @param string|null $twoFactorCode Código enviado pelo usuário.
      */
-    public static function startTwoFactorValidation(string $userId, ?string $twoFactorSecret = null): void
+    public static function startTwoFactorValidation(string $userId, ?string $twoFactorCode = null): void
     {
         self::initializeSession();
-
-        if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] !== $userId) {
+        
+        if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $userId) {
+            FlashMessages::setFlash('error', 'start_2fa_error', 'Ocorreu um erro no start 2fa');
             self::redirectTo('/');
         }
 
-        if ($twoFactorSecret) {
-            $_SESSION['two_factor_secret'] = $twoFactorSecret;
+        if ($twoFactorCode) {
+            $_SESSION['two_factor_code'] = $twoFactorCode;
             $_SESSION['two_factor_start_time'] = time(); // Marca o início da validação
         } else {
             $_SESSION['two_factor_validated'] = true; // Permite acesso direto se 2FA não estiver habilitado
         }
+ 
     }
 
     /**
@@ -38,12 +41,11 @@ class Security
     {
         self::initializeSession();
 
-        if (!isset($_SESSION['two_factor_secret'])) {
-            return false;
-        }
-
         $tfa = new TwoFactorAuth();
-        $twoFactorSecret = $_SESSION['two_factor_secret'];
+        $user = new LoginService();
+        $userData = $user->findById($_SESSION['user_id']);
+
+        $twoFactorSecret = $userData['two_factor_secret'];
 
         if ($tfa->verifyCode($twoFactorSecret, $userInputCode)) {
             $_SESSION['two_factor_validated'] = true;

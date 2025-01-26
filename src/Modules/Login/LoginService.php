@@ -6,6 +6,7 @@ use App\Core\Database;
 use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
 use PDO;
+
 class LoginService
 {
     public function validateUser($email, $password)
@@ -56,6 +57,21 @@ class LoginService
         return null;
     }
 
+    public function findById($id)
+    {
+        $db = Database::getInstance();
+
+        $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");
+        $stmt->execute(['id' => $id]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            return $user;
+        }
+
+        return null;
+    }
+
     public function insertResetToken(string $token, int $userId): bool
     {
         $db = Database::getInstance();
@@ -66,7 +82,7 @@ class LoginService
         $stmt->bindParam(':user_id', $userId, PDO::PARAM_INT);
         $stmt->bindParam(':token', $token, PDO::PARAM_STR);
         $stmt->bindParam(':expires_at', $expireTime, PDO::PARAM_STR);
-        if($stmt->execute()){
+        if ($stmt->execute()) {
             return true;
         }
 
@@ -89,31 +105,37 @@ class LoginService
     {
         $db = Database::getInstance();
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
+
         // Verifica novamente o token antes de alterar a senha
-        $stmt = $db->prepare('SELECT users.id, users.email, password_resets.token FROM password_resets 
-                              INNER JOIN users ON password_resets.user_id = users.id 
-                              WHERE password_resets.token = :token AND password_resets.expires_at > NOW()');
+        $stmt = $db->prepare('SELECT users.id, users.email FROM password_resets 
+                          INNER JOIN users ON password_resets.user_id = users.id 
+                          WHERE password_resets.token = :token AND password_resets.expires_at > NOW()');
         $stmt->execute(['token' => $token]);
         $row = $stmt->fetch();
 
         if (!$row) {
-            FlashMessages::setFlash('forgot_password_invalid_token', 'Token inválido ou expirado.');
+            FlashMessages::setFlash('error', 'invalid_token', 'Token inválido ou expirado.');
             header("Location: /{$currentLanguage}/reset-password");
-            return;
+            exit;
         }
 
         // Atualiza a senha do usuário
         $hashedPassword = password_hash($password, PASSWORD_BCRYPT);
-        $updateStmt = $db->prepare('UPDATE users SET password = :password WHERE email = :email AND id = :userId');
-        $updateStmt->execute(['password' => $hashedPassword, 'email' => $row['email'], 'id' => $row['id']]);
+        $updateStmt = $db->prepare('UPDATE users SET password = :password WHERE id = :userId');
+        $updateStmt->execute(['password' => $hashedPassword, 'userId' => $row['id']]);
+
+        if ($updateStmt->rowCount() === 0) {
+            FlashMessages::setFlash('error', 'password_change_error', 'Erro ao atualizar a senha. Tente novamente.');
+            header("Location: /{$currentLanguage}/reset-password?token=$token");
+            exit;
+        }
 
         // Remove o token usado
         $deleteStmt = $db->prepare('DELETE FROM password_resets WHERE token = :token');
         $deleteStmt->execute(['token' => $token]);
-        
-        FlashMessages::setFlash('forgot_password_reset_success', 'Senha redefinida com sucesso. Você já pode fazer login.');
-        header("Location: /{$currentLanguage}/reset-password");
-        return;
-    }
 
+        FlashMessages::setFlash('success','password_chenge_success' , 'Senha redefinida com sucesso. Você já pode fazer login.');
+        header("Location: /{$currentLanguage}/");
+        exit;
+    }
 }
