@@ -1,20 +1,19 @@
 <?php
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
+
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use App\Core\FlashMessages;
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
 
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
-$messages = FlashMessages::getFlash();
+
+
 ?>
 
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<?= $currentLanguage?>">
 
 <head>
     <meta charset="UTF-8">
@@ -53,19 +52,7 @@ $messages = FlashMessages::getFlash();
                         <h3 class="text-center mb-4"><?= _('Bem-vindo') ?></h3>
                         <?php
                         ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');
-
-                        $resend = null;
-
-                        if ($resend == 1) {
                         ?>
-                            <div class="text-center align-items-center flex-grow-1">
-                                <form method="POST" action="/<?= $currentLanguage; ?>/resendActivationEmail">
-                                    <button type="submit" class="btn btn-primary">Reenviar E-mail de Ativação</button>
-                                    <input type="hidden" name="resend_activation" value="1">
-                                    <input type="hidden" name="id" value="<?= $_SESSION['user_id'] ?>">
-                                </form>
-                            </div>
-                        <?php } ?>
                         <form method="POST" action="/<?= $currentLanguage; ?>/login">
                             <div class="mb-3">
                                 <label for="email" class="form-label"><?= _('E-mail:') ?></label>

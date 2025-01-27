@@ -7,7 +7,7 @@ $router->get('/', [LoginController::class, 'showLogin']);          // home e tel
 $router->get('/logout', [LoginController::class, 'logout']);       // logout sistema
 $router->get('/dashboard', [LoginController::class, 'showDashboard']); // dashboard
 $router->get('/forgot-password', [LoginController::class,'showForgotPassword']); // recuperar senha
-$router->get('/register', [LoginController::class,'showRegister']); // recuperar senha
+$router->get('/register', [LoginController::class,'showRegister']); // tela de registro de usuario
 $router->get('/reset-password', [LoginController::class, 'showResetPasswordForm']);
 $router->get('/two-factor-check', [LoginController::class, 'show2fa']); // apresenta a validação de 2fa
 
@@ -17,3 +17,4 @@ $router->post('/forgotPassword', [LoginController::class, 'processForgotPassword
 $router->post('/reset-password', [LoginController::class, 'processResetPassword']); // processo de reset de senha
 $router->post('/two-factor-check', [LoginController::class, 'process2fa']); // processo de validação de 2fa
 $router->post('/resendActivationEmail', [LoginController::class, 'resendActivationEmail']); // processo de validação de 2fa
+$router->post('/register', [LoginController::class,'processRegister']); // tela de registro de usuario

@@ -8,16 +8,16 @@ class FlashMessages
     
     public static function setFlash(string $type, string $var, string $message): void
     {
-        if (!isset($_SESSION)) {
-            session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); // Certifique-se de que a sessão está iniciada
         }
         $_SESSION['flash_messages'][$type][$var][] = $message;
     }
 
     public static function getFlash(): array
     {
-        if (!isset($_SESSION)) {
-            session_start();
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); // Certifique-se de que a sessão está iniciada
         }
         $messages = $_SESSION['flash_messages'] ?? [];
         unset($_SESSION['flash_messages']);

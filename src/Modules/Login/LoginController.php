@@ -188,6 +188,8 @@ class LoginController
 
     public function processLogin()
     {
+        
+        
         $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
         $password = trim($_POST['password'] ?? '');
 
@@ -195,22 +197,22 @@ class LoginController
 
         $loginService = new LoginService();
         $user = $loginService->validateUser($email, $password);
-
+        
         if (!$user) {
 
             FlashMessages::setFlash('danger', 'access_error', 'Usuário ou senha inválidos.');
             header("Location: /{$currentLanguage}/");
             return;
         }
-
         self::initializeUserSession($user);
+     
 
         if ($user['activated'] == '0') {
             FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou clique no botão para reenviar o link de ativação.');
             header("Location: /{$currentLanguage}/");
             return;
         }
-
+   
         // Verifica se o usuário possui 2FA habilitado
         if ($user['two_factor_enabled']) {
             include __DIR__ . '/views/twoFactor.php';
@@ -244,6 +246,97 @@ class LoginController
 
         $_SESSION['2fa_pending'] = false;
         header("Location: /{$currentLanguage}/dashboard");
+    }
+
+    public function processRegister()
+    {
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $userData = [];
+            $userData['name'] = trim($_POST['name']);
+            $userData['email'] = trim($_POST['email']);
+            $userData['password'] = $_POST['password'];
+            $userData['confirmPassword'] = $_POST['confirm_password'];
+
+            // Validações de nome
+            if (empty($userData['name'])) {
+                FlashMessages::setFlash('danger', 'required_name', 'O nome é obrigatório.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+
+            if (empty($userData['name']) || !preg_match("/^[\p{L}\s]+$/u", $userData['name'])) {
+                FlashMessages::setFlash('danger', 'invalid_name', 'Nome inválido. Apenas letras e espaços são permitidos.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+
+            // Validação de e-mail
+            if (empty($userData['email'])) {
+                FlashMessages::setFlash('danger', 'required_name', 'O e-mail é obrigatório.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            } elseif (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
+                FlashMessages::setFlash('danger', 'invalid_email', 'E-mail inválido.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+
+            // Validação de senha
+            if (empty($userData['password'])) {
+                FlashMessages::setFlash('danger', 'password_required', 'Senha é obrigatória');
+                header("Location: /{$currentLanguage}/");
+                return;
+            } elseif ($userData['password'] !== $userData['confirmPassword']) {
+                FlashMessages::setFlash('danger', 'password_not_match', 'As senhas não coincidem.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+
+
+            // Cria o serviço de usuário e registra o usuário
+            try {
+
+                $loginService = new LoginService();
+
+                if ($loginService->findByEmail($userData['email'])) {
+                    FlashMessages::setFlash('danger', 'email_exist', 'E-mail já está registrado.');
+                    header("Location: /{$currentLanguage}/register");
+                    return;
+                } else {
+
+                    $userData['activationToken'] = bin2hex(random_bytes(32)); // Gerar token de ativação
+
+                    if ($loginService->addUserWithRoles($userData)) {
+                        // Envia o e-mail de ativação
+                        $activationLink = $_ENV['APP_URL'] . "/activate.php?token=" . $userData['activationToken'];
+                        $emailSent = MailService::send(
+                            $userData['email'],
+                            "Ativação da sua conta",
+                            "<p>Olá {$userData['name']},</p>
+                                <p>Obrigado por se registrar. Por favor, ative sua conta clicando no link abaixo:</p>
+                                <p><a href='$activationLink'>Ativar Conta</a></p>
+                                <p>Se você não se cadastrou, ignore este e-mail.</p>"
+                        );
+
+                        if (!$emailSent) {
+                            FlashMessages::setFlash('danger', 'email_activation_error', 'Erro ao enviar o e-mail de ativação.');
+                            header("Location: /{$currentLanguage}/register");
+                            return;
+                            
+                        }
+                    }
+                    FlashMessages::setFlash('success', 'register_success', 'Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.');
+                    header("Location: /{$currentLanguage}/register");
+                    return;
+                }
+            } catch (Exception $e) {
+                FlashMessages::setFlash('danger', 'register_error', 'Erro ao criar a conta: ' . $e->getMessage());
+                header("Location: /{$currentLanguage}/register");
+                return;
+            }
+        }
     }
 
     private function initializeUserSession(array $user)
@@ -310,7 +403,6 @@ class LoginController
             FlashMessages::setFlash('danger', 'resent_activation_email_not_found', 'Falha ao localizar o token entre em contato com o suporte.');
             header("Location: /{$currentLanguage}/");
             return;
-
         }
     }
 }

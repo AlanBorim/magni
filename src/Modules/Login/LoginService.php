@@ -6,6 +6,7 @@ use App\Core\Database;
 use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
 use PDO;
+use Exception;
 
 class LoginService
 {
@@ -137,5 +138,58 @@ class LoginService
         FlashMessages::setFlash('success','password_chenge_success' , 'Senha redefinida com sucesso. Você já pode fazer login.');
         header("Location: /{$currentLanguage}/");
         exit;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $userData
+     * @param array|null $roles
+     * @return boolean
+     */
+    public static function addUserWithRoles(array $userData, array $roles = null): bool
+    {
+        try {
+            // Inicia a conexão com o banco
+            $db = Database::getInstance();
+
+            // Inicia a transação
+            $db->beginTransaction();
+
+            // Insere o novo usuário na tabela `users`
+            $stmt = $db->prepare("
+            INSERT INTO users (name, email, password, telefone, mail_notification, activation_token)
+            VALUES (:name, :email, :password, :telefone, :mail_notification, :activation_token)");
+            $stmt->execute([
+                ':name' => $userData['name'],
+                ':email' => $userData['email'],
+                ':password' => password_hash($userData['password'], PASSWORD_BCRYPT),
+                ':telefone' => $userData['telefone'] ?? null,
+                ':mail_notification' => $userData['mail_notification'] ?? '0',
+                ':activation_token' => $userData['activationToken'],
+            ]);
+
+            // Obtém o ID do usuário recém-inserido se não houver permissões inseridas a permissão padrão é 2
+            $userId = $db->lastInsertId();
+            $roleId = $userData['role'] ?? 2;
+
+            // Insere as roles associadas na tabela `user_roles`
+            $roleStmt = $db->prepare("
+            INSERT INTO user_roles (user_id, role_id)
+            VALUES (:user_id, :role_id)");
+            $roleStmt->execute([
+                ':user_id' => $userId,
+                ':role_id' => $roleId,
+            ]);
+
+            // Confirma a transação
+            $db->commit();
+
+            return true;
+        } catch (Exception $e) {
+            // Reverte a transação em caso de erro
+            $db->rollBack();
+            throw new Exception("Erro ao adicionar o usuário: " . $e->getMessage());
+        }
     }
 }
