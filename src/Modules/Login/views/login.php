@@ -13,7 +13,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 
 <!DOCTYPE html>
-<html lang="<?= $currentLanguage?>">
+<html lang="<?= $currentLanguage ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -51,8 +51,19 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _('Bem-vindo') ?></h3>
                         <?php
-                        ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php');
+                        $resend = 0;
+                        ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php', $resend);
+                        
+                        if ($resend == 1) {
                         ?>
+                            <div class="text-center align-items-center flex-grow-1">
+                                <form method="POST" action="/<?= $currentLanguage; ?>/resendActivationEmail">
+                                    <button type="submit" class="btn btn-primary">Reenviar E-mail de Ativação</button>
+                                    <input type="hidden" name="resend_activation" value="1">
+                                    <input type="hidden" name="id" value="<?= $_SESSION['user_id'] ?>">
+                                </form>
+                            </div>
+                        <?php } ?>
                         <form method="POST" action="/<?= $currentLanguage; ?>/login">
                             <div class="mb-3">
                                 <label for="email" class="form-label"><?= _('E-mail:') ?></label>

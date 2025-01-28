@@ -188,8 +188,8 @@ class LoginController
 
     public function processLogin()
     {
-        
-        
+
+
         $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
         $password = trim($_POST['password'] ?? '');
 
@@ -197,7 +197,7 @@ class LoginController
 
         $loginService = new LoginService();
         $user = $loginService->validateUser($email, $password);
-        
+
         if (!$user) {
 
             FlashMessages::setFlash('danger', 'access_error', 'Usuário ou senha inválidos.');
@@ -205,14 +205,14 @@ class LoginController
             return;
         }
         self::initializeUserSession($user);
-     
+
 
         if ($user['activated'] == '0') {
             FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou clique no botão para reenviar o link de ativação.');
             header("Location: /{$currentLanguage}/");
             return;
         }
-   
+
         // Verifica se o usuário possui 2FA habilitado
         if ($user['two_factor_enabled']) {
             include __DIR__ . '/views/twoFactor.php';
@@ -310,7 +310,7 @@ class LoginController
 
                     if ($loginService->addUserWithRoles($userData)) {
                         // Envia o e-mail de ativação
-                        $activationLink = $_ENV['APP_URL'] . "/activate.php?token=" . $userData['activationToken'];
+                        $activationLink = $_ENV['APP_URL'] . "/" . $currentLanguage . "/activateLogin?token=" . $userData['activationToken'];
                         $emailSent = MailService::send(
                             $userData['email'],
                             "Ativação da sua conta",
@@ -324,7 +324,6 @@ class LoginController
                             FlashMessages::setFlash('danger', 'email_activation_error', 'Erro ao enviar o e-mail de ativação.');
                             header("Location: /{$currentLanguage}/register");
                             return;
-                            
                         }
                     }
                     FlashMessages::setFlash('success', 'register_success', 'Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.');
@@ -382,7 +381,7 @@ class LoginController
 
         if (isset($user['activation_token']) && $user['activation_token'] != '') {
             // Reenvia o e-mail de ativação
-            $activationLink = $_ENV['APP_URL'] . "/activate.php?token=" . $user['activation_token'];
+            $activationLink = $_ENV['APP_URL'] . "/" . $currentLanguage . "/activateLogin?token=" . $user['activation_token'];
             $message = "
                 <p>Olá, {$user['name']}!</p>
                 <p>Por favor, clique no link abaixo para ativar sua conta:</p>
@@ -401,6 +400,29 @@ class LoginController
             }
         } else {
             FlashMessages::setFlash('danger', 'resent_activation_email_not_found', 'Falha ao localizar o token entre em contato com o suporte.');
+            header("Location: /{$currentLanguage}/");
+            return;
+        }
+    }
+
+    public function activateLogin()
+    {
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+        if (isset($_REQUEST['token'])) {
+
+            $loginService = new LoginService();
+
+            if ($loginService->findByToken($_GET['token'])) {
+                FlashMessages::setFlash('success', 'activation_token_success', 'Conta ativada com sucesso.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            } else {
+                FlashMessages::setFlash('danger', 'activation_token_error', 'Erro ao ativar a conta.');
+                header("Location: /{$currentLanguage}/");
+                return;
+            }
+        } else {
+            FlashMessages::setFlash('danger', 'activation_token_not_found', 'Token não fornecido.');
             header("Location: /{$currentLanguage}/");
             return;
         }

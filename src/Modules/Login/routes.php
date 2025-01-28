@@ -10,6 +10,7 @@ $router->get('/forgot-password', [LoginController::class,'showForgotPassword']);
 $router->get('/register', [LoginController::class,'showRegister']); // tela de registro de usuario
 $router->get('/reset-password', [LoginController::class, 'showResetPasswordForm']);
 $router->get('/two-factor-check', [LoginController::class, 'show2fa']); // apresenta a validação de 2fa
+$router->get('/activateLogin', [LoginController::class, 'activateLogin']); //rota da ativação de login
 
 // Definição das rotas para o módulo login método post
 $router->post('/login', [LoginController::class, 'processLogin']); // processo de envio das informações para o login

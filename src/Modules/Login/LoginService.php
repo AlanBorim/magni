@@ -192,4 +192,23 @@ class LoginService
             throw new Exception("Erro ao adicionar o usuário: " . $e->getMessage());
         }
     }
+
+    public static function findByToken(string $token){
+        $db = Database::getInstance();
+
+        // Verifica o token
+        $stmt = $db->prepare("SELECT id FROM users WHERE activation_token = :token AND activated = '0'");
+        $stmt->execute([':token' => $token]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+       
+        if ($user) {
+            // Ativa o usuário
+            $updateStmt = $db->prepare("UPDATE users SET activated = '1', activation_token = NULL WHERE id = :id");
+            $updateStmt->execute([':id' => $user['id']]);
+
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

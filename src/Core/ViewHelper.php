@@ -9,7 +9,7 @@ class ViewHelper
      *
      * @param string $filePath Caminho do arquivo a ser incluído.
      */
-    public static function includeIfReadable(string $filePath)
+    public static function includeIfReadable(string $filePath, &$resend = null)
     {
         if (is_readable($filePath)) {
             include $filePath;
