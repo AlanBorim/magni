@@ -45,6 +45,11 @@ class LoginController
         include __DIR__ . '/views/register.php';
     }
 
+    public function showProfile()
+    {
+        include __DIR__ . '/views/profile.php';
+    }
+
     public function showResetPasswordForm()
     {
 
@@ -327,12 +332,12 @@ class LoginController
                         }
                     }
                     FlashMessages::setFlash('success', 'register_success', 'Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.');
-                    header("Location: /{$currentLanguage}/register");
+                    header("Location: /{$currentLanguage}/");
                     return;
                 }
             } catch (Exception $e) {
                 FlashMessages::setFlash('danger', 'register_error', 'Erro ao criar a conta: ' . $e->getMessage());
-                header("Location: /{$currentLanguage}/register");
+                header("Location: /{$currentLanguage}/");
                 return;
             }
         }

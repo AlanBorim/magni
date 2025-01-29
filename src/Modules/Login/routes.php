@@ -1,6 +1,7 @@
 <?php
 
 use App\Modules\Login\LoginController;
+use App\Modules\Login\ProfileController;
 
 // Definição das rotas para o módulo Login
 $router->get('/', [LoginController::class, 'showLogin']);          // home e tela de login
@@ -11,6 +12,7 @@ $router->get('/register', [LoginController::class,'showRegister']); // tela de r
 $router->get('/reset-password', [LoginController::class, 'showResetPasswordForm']);
 $router->get('/two-factor-check', [LoginController::class, 'show2fa']); // apresenta a validação de 2fa
 $router->get('/activateLogin', [LoginController::class, 'activateLogin']); //rota da ativação de login
+$router->get('/profile', [LoginController::class, 'showProfile']); //apresenta o perfil do usuario
 
 // Definição das rotas para o módulo login método post
 $router->post('/login', [LoginController::class, 'processLogin']); // processo de envio das informações para o login
@@ -19,3 +21,7 @@ $router->post('/reset-password', [LoginController::class, 'processResetPassword'
 $router->post('/two-factor-check', [LoginController::class, 'process2fa']); // processo de validação de 2fa
 $router->post('/resendActivationEmail', [LoginController::class, 'resendActivationEmail']); // processo de validação de 2fa
 $router->post('/register', [LoginController::class,'processRegister']); // tela de registro de usuario
+
+$router->post('/update-profile', [ProfileController::class,'processUpdateProfile']);
+$router->post('/update-profile-picture', [ProfileController::class,'processUpdateProfilePic']);
+$router->post('/update-password', [ProfileController::class,'processUpdateProfilePass']);

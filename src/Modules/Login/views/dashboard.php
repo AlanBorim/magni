@@ -8,7 +8,7 @@ use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-// Security::enforceSessionSecurity();
+Security::enforceSessionSecurity();
 
 $role = $_SESSION['roleName']; // Permissões do usuário
 $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável para verificar se o 2FA está habilitado
