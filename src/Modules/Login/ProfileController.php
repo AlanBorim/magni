@@ -65,22 +65,57 @@ class ProfileController
             FlashMessages::setFlash('success', 'update_profile_success', 'Profile atualizado com sucesso');
             header("Location: /{$currentLanguage}/profile");
             return;
-            
         } else {
             FlashMessages::setFlash('danger', 'update_profile_error', 'Erro ao atualizar o perfil');
             header("Location: /{$currentLanguage}/profile");
             return;
-            
+        }
+    }
+
+    public function processUpdateProfilePass()
+    {
+        Security::enforceSessionSecurity();
+        $errors = [
+            'user_not_found',
+            'password_not_found',
+            'password_wrong_type',
+            'password_failure'
+        ];
+       
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+
+        // Captura os dados do formulário
+        $currentPassword = $_POST['current_password'] ?? '';
+        $newPassword = $_POST['new_password'] ?? '';
+        $confirmPassword = $_POST['confirm_password'] ?? '';
+
+        // Valida se as novas senhas coincidem
+        if ($newPassword !== $confirmPassword) {
+            FlashMessages::setFlash('danger', 'password_dont_match', 'As novas senhas não coincidem.');
+            header("Location: /{$currentLanguage}/profile");
+            return;
+        }
+
+        // Chama o método de atualização de senha
+        $result = ProfileService::updatePassword($_SESSION['user_id'], $currentPassword, $newPassword);
+
+        // Verifica o resultado e apresenta mensagens apropriadas
+        if ($result['success'] == 'password_ok') {
+            FlashMessages::setFlash('success', $result['success'], $result['message']);
+            header("Location: /{$currentLanguage}/profile");
+            return;
+        } else {
+            if (in_array($result['success'], $errors)) {
+
+                FlashMessages::setFlash('danger', $result['success'], $result['message']);
+                header("Location: /{$currentLanguage}/profile");
+                return;
+            }
         }
     }
 
     public function processUpdateProfilePic()
     {
         echo "atualiza foto de perfil";
-    }
-
-    public function processUpdateProfilePass()
-    {
-        echo "atualiza Senha";
     }
 }

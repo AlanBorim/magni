@@ -41,7 +41,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
     </div>
     <!-- Barra de seleção de idioma -->
-    <div class="w-25 py-2 border-bottom text-end">
+    <div class="w-25 py-2 border-bottom text-end small">
         <?php
         // Detecta o idioma atual e a URI
         $currentUri = $_SERVER['REQUEST_URI']; // URI completa
@@ -57,7 +57,9 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
         <a href="<?= $enUrl ?>" class="me-2">
             <img src="/public/assets/images/flags/en.png" alt="English" title="English" width="20" height="20">
         </a>
+        Sua sessão expirará em: <span id="session-timer"></span>
     </div>
+    
 
 
 </nav>

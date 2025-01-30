@@ -193,7 +193,8 @@ class LoginService
         }
     }
 
-    public static function findByToken(string $token){
+    public static function findByToken(string $token)
+    {
         $db = Database::getInstance();
 
         // Verifica o token
@@ -210,5 +211,12 @@ class LoginService
         } else {
             return false;
         }
+    }
+
+    public static function updateLastLogin(int $userId): void
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = :user_id");
+        $stmt->execute(['user_id' => $userId]);
     }
 }

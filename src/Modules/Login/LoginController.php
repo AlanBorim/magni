@@ -7,9 +7,12 @@ use App\Core\LanguageDetector;
 use App\Core\TokenGenerator;
 use App\Core\MailService;
 use App\Core\Security;
+use App\Core\SessionManager;
 use App\Modules\Login\LoginService;
 
+
 use Exception;
+use RuntimeException;
 
 class LoginController
 {
@@ -191,40 +194,52 @@ class LoginController
         }
     }
 
-    public function processLogin()
+    public function processLogin(): void
     {
-
-
+        // Sanitiza os dados de entrada
         $email = filter_var(trim($_POST['email'] ?? ''), FILTER_SANITIZE_EMAIL);
         $password = trim($_POST['password'] ?? '');
-
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
+        // Valida o usuário e senha
         $loginService = new LoginService();
         $user = $loginService->validateUser($email, $password);
 
         if (!$user) {
-
             FlashMessages::setFlash('danger', 'access_error', 'Usuário ou senha inválidos.');
             header("Location: /{$currentLanguage}/");
-            return;
+            exit; // Garante a interrupção imediata
         }
-        self::initializeUserSession($user);
 
-
-        if ($user['activated'] == '0') {
-            FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou clique no botão para reenviar o link de ativação.');
+        // Define os dados da sessão usando SessionManager
+        try {
+            SessionManager::initializeUserSession($user);
+        } catch (RuntimeException $e) {
+            // Log de erro e tratamento de falha na sessão
+            error_log("Erro na sessão: " . $e->getMessage());
+            FlashMessages::setFlash('danger', 'session_error', 'Erro ao iniciar a sessão.' . $e->getMessage());
             header("Location: /{$currentLanguage}/");
-            return;
+            exit;
         }
 
-        // Verifica se o usuário possui 2FA habilitado
+        // Atualiza o último login
+        LoginService::updateLastLogin($user['id']);
+
+        // Verifica se a conta está ativada
+        if ($user['activated'] == '0') {
+            FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.');
+            SessionManager::destroySession(); // Limpeza imediata
+            header("Location: /{$currentLanguage}/");
+            exit;
+        }
+
+        // Controle de 2FA
         if ($user['two_factor_enabled']) {
-            include __DIR__ . '/views/twoFactor.php';
+            header("Location: /{$currentLanguage}/two-factor");
         } else {
-            // Redireciona para a dashboard
             header("Location: /{$currentLanguage}/dashboard");
         }
+        exit; // Sempre interrompe após redirecionamento
     }
 
     public function process2fa()

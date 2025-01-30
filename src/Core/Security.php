@@ -4,6 +4,7 @@ namespace App\Core;
 
 use App\Modules\Login\LoginService;
 use RobThree\Auth\TwoFactorAuth;
+use App\Core\SessionManager;
 
 class Security
 {
@@ -16,7 +17,7 @@ class Security
     public static function startTwoFactorValidation(string $userId, ?string $twoFactorCode = null): void
     {
         self::initializeSession();
-        
+
         if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $userId) {
             FlashMessages::setFlash('danger', 'start_2fa_error', 'Ocorreu um erro no start 2fa');
             self::redirectTo('/');
@@ -28,7 +29,6 @@ class Security
         } else {
             $_SESSION['two_factor_validated'] = true; // Permite acesso direto se 2FA não estiver habilitado
         }
- 
     }
 
     /**
@@ -79,6 +79,13 @@ class Security
      */
     public static function enforceSessionSecurity(): void
     {
+
+        if (SessionManager::isSessionExpired()) {
+            SessionManager::destroySession();
+            self::redirectTo('/');
+            exit;
+        }
+
         self::initializeSession();
 
         $currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
@@ -89,15 +96,6 @@ class Security
                 self::redirectTo('/');
             }
             return;
-        }
-
-        // Verifica inconsistências na sessão
-        if (
-            $_SESSION['user_ip'] !== $_SERVER['REMOTE_ADDR'] ||
-            $_SESSION['user_agent'] !== $_SERVER['HTTP_USER_AGENT']
-        ) {
-            session_destroy();
-            self::redirectTo('/');
         }
     }
 

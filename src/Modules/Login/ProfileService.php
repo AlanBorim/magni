@@ -54,4 +54,58 @@ class ProfileService
             throw new Exception("Erro ao atualizar o perfil: " . $e->getMessage());
         }
     }
+
+    public static function updatePassword(int $userId, string $currentPassword, string $newPassword, bool $perfil = false): array
+    {
+        try {
+            self::init();
+
+            if (!$perfil) {
+                // Recupera a senha atual do banco de dados
+                $stmt = self::$db->prepare("SELECT password FROM users WHERE id = :id");
+                $stmt->execute(['id' => $userId]);
+                $user = $stmt->fetch();
+
+                if (!$user) {
+                    return [
+                        'success' => 'user_not_found',
+                        'message' => 'Usuário não encontrado.',
+                    ];
+                }
+
+                // Verifica se a senha atual é válida
+                if (!password_verify($currentPassword, $user['password'])) {
+                    return [
+                        'success' => 'password_not_found',
+                        'message' => 'A senha atual está incorreta.',
+                    ];
+                }
+            }
+
+            // Verifica se a nova senha é suficientemente forte
+            if (strlen($newPassword) < 8) {
+                return [
+                    'success' => 'password_wrong_type',
+                    'message' => 'A nova senha deve ter pelo menos 8 caracteres.',
+                ];
+            }
+
+            // Hash da nova senha
+            $hashedPassword = password_hash($newPassword, PASSWORD_BCRYPT);
+
+            // Atualiza a senha no banco de dados
+            $updateStmt = self::$db->prepare("UPDATE users SET password = :password WHERE id = :id");
+            $updateStmt->execute(['password' => $hashedPassword, 'id' => $userId]);
+
+            return [
+                'success' => 'password_ok',
+                'message' => 'Senha alterada com sucesso.',
+            ];
+        } catch (Exception $e) {
+            return [
+                'success' => 'password_failure',
+                'message' => 'Erro ao alterar a senha: ' . $e->getMessage(),
+            ];
+        }
+    }
 }

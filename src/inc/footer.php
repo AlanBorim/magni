@@ -72,4 +72,35 @@
 
         initializeTheme();
     });
+
+    // Função para atualizar a contagem regressiva
+    function updateSessionTimer() {
+            // Faz uma requisição ao servidor para obter o tempo restante da sessão
+            fetch('/pt/sessionTime')
+                .then(response => response.json())
+                .then(data => {
+                    const remainingTime = data.remainingTime; // Tempo restante em segundos
+
+                    if (remainingTime <= 0) {
+                        // Sessão expirada
+                        document.getElementById('session-timer').textContent = 'Sessão expirada!';
+                        window.location.href = '/'; // Redireciona para a página de login
+                    } else {
+                        // Converte o tempo restante para minutos e segundos
+                        const minutes = Math.floor(remainingTime / 60);
+                        const seconds = remainingTime % 60;
+
+                        // Exibe o tempo restante
+                        document.getElementById('session-timer').textContent =
+                            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }
+                })
+                .catch(error => console.error('Erro ao obter o tempo da sessão:', error));
+        }
+
+        // Atualiza o timer a cada segundo
+        setInterval(updateSessionTimer, 1000);
+
+        // Executa a função imediatamente ao carregar a página
+        updateSessionTimer();
 </script>
