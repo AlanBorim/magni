@@ -12,6 +12,7 @@ use App\Modules\Login\LoginService;
 
 
 use Exception;
+use RobThree\Auth\TwoFactorAuth;
 use RuntimeException;
 
 class LoginController
@@ -78,6 +79,11 @@ class LoginController
     public function show2fa()
     {
         include __DIR__ . '/views/twoFactor.php';
+    }
+
+    public function showEnable2fa()
+    {
+        include __DIR__ . '/views/enableTwoFactor.php';
     }
 
     public function processResetPassword()
@@ -246,7 +252,7 @@ class LoginController
     {
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-        session_start();
+        Security::enforceSessionSecurity();
 
         $code = $_REQUEST['two_factor_code'] ?? '';
 
@@ -358,19 +364,33 @@ class LoginController
         }
     }
 
-    private function initializeUserSession(array $user)
+    public function processEnable2fa()
     {
-        session_start();
-        session_regenerate_id(true);
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+        Security::enforceSessionSecurity();
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['roleName'] = $user['roleName'];
-        $_SESSION['roleId'] = $user['roleId'];
-        $_SESSION['two_factor_enabled'] = $user['two_factor_enabled'];
-        $_SESSION['is_2fa_verified'] = false;
-        $_SESSION['user_ip'] = $_SERVER['REMOTE_ADDR'];
-        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+        $userInputCode = $_REQUEST['two_factor_code'];
+
+        // Carregar a biblioteca RobThree
+
+        $tfa = new TwoFactorAuth(new \RobThree\Auth\Providers\Qr\QRServerProvider());
+
+        // Validar o código 2FA fornecido
+        if ($tfa->verifyCode($_REQUEST['secret'], $userInputCode)) {
+            $loginService = new LoginService();
+            if ($loginService->updateEnable2fa($_SESSION['user_id'])) {
+                
+                $_SESSION['two_factor_enabled'] = 1;
+                FlashMessages::setFlash('success', 'secret_ok', '2FA habilitado com sucesso.');
+                header("Location: /{$currentLanguage}/enable2fa");
+                return;
+            }
+        } else {
+            FlashMessages::setFlash('danger', 'invalid_secret', 'Código inválido. Tente novamente.');
+            header("Location: /{$currentLanguage}/enable2fa");
+            return;
+           
+        }
     }
 
     public function logout()
@@ -446,5 +466,24 @@ class LoginController
             header("Location: /{$currentLanguage}/");
             return;
         }
+    }
+
+    public function getQrCode2fa()
+    {
+
+        Security::enforceSessionSecurity();
+
+        $tfa = new TwoFactorAuth();
+        // Gerar chave secreta única para o usuário
+        $secret = $tfa->createSecret();
+
+        if (LoginService::updateSecret($_SESSION['user_id'], $secret)) {
+            $retorno = [];
+            $retorno['qrCode'] = $tfa->getQRCodeImageAsDataUri('Magni', $secret);
+            $retorno['secret'] = $secret;
+            return $retorno;
+        }
+
+        return false;
     }
 }

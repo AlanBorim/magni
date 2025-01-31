@@ -135,7 +135,7 @@ class LoginService
         $deleteStmt = $db->prepare('DELETE FROM password_resets WHERE token = :token');
         $deleteStmt->execute(['token' => $token]);
 
-        FlashMessages::setFlash('success','password_chenge_success' , 'Senha redefinida com sucesso. Você já pode fazer login.');
+        FlashMessages::setFlash('success', 'password_chenge_success', 'Senha redefinida com sucesso. Você já pode fazer login.');
         header("Location: /{$currentLanguage}/");
         exit;
     }
@@ -201,7 +201,7 @@ class LoginService
         $stmt = $db->prepare("SELECT id FROM users WHERE activation_token = :token AND activated = '0'");
         $stmt->execute([':token' => $token]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
-       
+
         if ($user) {
             // Ativa o usuário
             $updateStmt = $db->prepare("UPDATE users SET activated = '1', activation_token = NULL WHERE id = :id");
@@ -218,5 +218,26 @@ class LoginService
         $db = Database::getInstance();
         $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = :user_id");
         $stmt->execute(['user_id' => $userId]);
+    }
+
+    public static function updateSecret(int $userId, string $secret): bool
+    {
+        $db = Database::getInstance();
+        $updateQuery = $db->prepare("UPDATE users SET two_factor_secret = :secretCode WHERE id = :id");
+        if ($updateQuery->execute(['id' => $userId, 'secretCode' => $secret])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public function updateEnable2fa($userId): bool
+    {
+        $db = Database::getInstance();
+        $updateQuery = $db->prepare("UPDATE users SET two_factor_enabled = '1' WHERE id = :id");
+        if ($updateQuery->execute(['id' => $userId])) {
+            return true;
+        }
+        return false;
     }
 }

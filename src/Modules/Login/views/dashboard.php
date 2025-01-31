@@ -18,7 +18,7 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
 ?>
 
 <!DOCTYPE html>
-<html lang="<?= $locale ?>">
+<html lang="<?= $currentLanguage ?>">
 
 <head>
     <meta charset="UTF-8">
@@ -39,10 +39,10 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
         <?php if (!$twoFactorEnabled): ?>
             <div class="alert alert-warning">
                 <strong><?= _('Dash Attention') ?></strong> <?= _('Dash 2fa') ?>
-                <a href="/configurar-2fa" class="btn btn-warning btn-sm"><?= _('Dash 2fa button') ?></a>
+                <a href="/<?= $currentLanguage ?>/enable2fa" class="btn btn-warning btn-sm"><?= _('Dash 2fa button') ?></a>
             </div>
         <?php endif; ?>
-
+        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
         <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
             <div class="alert alert-info"><?= _('Dash permission desc') ?></div>
 
