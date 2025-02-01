@@ -81,7 +81,7 @@ class ProfileController
             'password_wrong_type',
             'password_failure'
         ];
-       
+
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
         // Captura os dados do formulário
@@ -116,6 +116,31 @@ class ProfileController
 
     public function processUpdateProfilePic()
     {
-        echo "atualiza foto de perfil";
+        Security::enforceSessionSecurity();
+        $errors = [
+            'no_picture',
+            'wrong_type',
+            'wrong_size',
+            'save_file_error',
+            'save_error'
+        ];
+
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
+        
+        $result = ProfileService::updateProfilePicture($_SESSION['user_id'], $_FILES['profile_picture']);
+
+        // Verifica o resultado e apresenta mensagens apropriadas
+        if ($result['success'] == 'save_ok') {
+            FlashMessages::setFlash('success', $result['success'], $result['message']);
+            header("Location: /{$currentLanguage}/profile");
+            return;
+        } else {
+            if (in_array($result['success'], $errors)) {
+
+                FlashMessages::setFlash('danger', $result['success'], $result['message']);
+                header("Location: /{$currentLanguage}/profile");
+                return;
+            }
+        }
     }
 }

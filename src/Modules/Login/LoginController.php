@@ -264,14 +264,14 @@ class LoginController
 
         Security::startTwoFactorValidation($_SESSION['user_id'], $code);
 
-        if (!Security::validateTwoFactorCode($code)) {
+        if (Security::validateTwoFactorCode($code)) {
+            $_SESSION['2fa_pending'] = false;
+            header("Location: /{$currentLanguage}/dashboard");
+        } else {
             FlashMessages::setFlash('danger', 'invalid_2fa', 'Código 2FA inválido.');
-            header("Location: /{$currentLanguage}/two-factor-check");
+            header("Location: /{$currentLanguage}/two-factor");
             return;
         }
-
-        $_SESSION['2fa_pending'] = false;
-        header("Location: /{$currentLanguage}/dashboard");
     }
 
     public function processRegister()
@@ -379,7 +379,7 @@ class LoginController
         if ($tfa->verifyCode($_REQUEST['secret'], $userInputCode)) {
             $loginService = new LoginService();
             if ($loginService->updateEnable2fa($_SESSION['user_id'])) {
-                
+
                 $_SESSION['two_factor_enabled'] = 1;
                 FlashMessages::setFlash('success', 'secret_ok', '2FA habilitado com sucesso.');
                 header("Location: /{$currentLanguage}/enable2fa");
@@ -389,7 +389,6 @@ class LoginController
             FlashMessages::setFlash('danger', 'invalid_secret', 'Código inválido. Tente novamente.');
             header("Location: /{$currentLanguage}/enable2fa");
             return;
-           
         }
     }
 

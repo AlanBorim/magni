@@ -75,29 +75,38 @@ class Security
     }
 
     /**
-     * Garante a segurança da sessão do usuário (IP e User-Agent).
+     * Garante a segurança da sessão do usuário (IP, User-Agent) e controla tempo de inatividade.
      */
     public static function enforceSessionSecurity(): void
     {
-
-        if (SessionManager::isSessionExpired()) {
-            SessionManager::destroySession();
-            self::redirectTo('/');
-            exit;
-        }
-
         self::initializeSession();
 
-        $currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
-        $publicPages = ['login', 'verify-2fa'];
+        // Define páginas públicas onde a segurança da sessão NÃO será aplicada
+        $publicPages = ['login', 'verify-2fa', 'forgot-password', 'register'];
 
+        // Obtém a página atual sem parâmetros da URL
+        $currentPage = basename(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+
+        // Se o usuário NÃO estiver logado
         if (!isset($_SESSION['user_id'])) {
             if (!in_array($currentPage, $publicPages)) {
                 self::redirectTo('/');
             }
             return;
         }
+
+        // **Iniciar a verificação de tempo de sessão APENAS na dashboard**
+        if ($currentPage === 'dashboard') {
+            if (SessionManager::isSessionExpired()) {
+                SessionManager::destroySession();
+                FlashMessages::setFlash('error', 'session_expired', 'Sua sessão expirou. Faça login novamente.');
+                self::redirectTo('/');
+            } else {
+                SessionManager::refreshSession(); // Renova o tempo de inatividade
+            }
+        }
     }
+
 
     /**
      * Define a segurança da sessão no momento do login.

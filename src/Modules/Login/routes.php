@@ -10,7 +10,7 @@ $router->get('/dashboard', [LoginController::class, 'showDashboard']); // dashbo
 $router->get('/forgot-password', [LoginController::class,'showForgotPassword']); // recuperar senha
 $router->get('/register', [LoginController::class,'showRegister']); // tela de registro de usuario
 $router->get('/reset-password', [LoginController::class, 'showResetPasswordForm']);
-$router->get('/two-factor-check', [LoginController::class, 'show2fa']); // apresenta a validação de 2fa
+$router->get('/two-factor', [LoginController::class, 'show2fa']); // apresenta a validação de 2fa
 $router->get('/activateLogin', [LoginController::class, 'activateLogin']); //rota da ativação de login
 $router->get('/profile', [LoginController::class, 'showProfile']); //apresenta o perfil do usuario
 $router->get('/enable2fa', [LoginController::class, 'showEnable2fa']); //apresenta o perfil do usuario

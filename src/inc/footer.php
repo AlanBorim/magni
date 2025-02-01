@@ -73,9 +73,16 @@
         initializeTheme();
     });
 
-    // Função para atualizar a contagem regressiva
-    function updateSessionTimer() {
-            // Faz uma requisição ao servidor para obter o tempo restante da sessão
+    // Lista de páginas onde o timer NÃO deve rodar
+    const publicPages = ['pt','en','login', 'register', 'forgot-password', 'verify-2fa','two-factor', 'reset-password'];
+
+    // Obtém a URL atual e extrai a última parte (exemplo: 'dashboard')
+    const currentPage = window.location.pathname.split('/').filter(Boolean).pop();
+
+    // Verifica se a página atual está na lista de páginas públicas
+    if (!publicPages.includes(currentPage)) {
+        // Função para atualizar a contagem regressiva da sessão
+        function updateSessionTimer() {
             fetch('/pt/sessionTime')
                 .then(response => response.json())
                 .then(data => {
@@ -90,7 +97,7 @@
                         const minutes = Math.floor(remainingTime / 60);
                         const seconds = remainingTime % 60;
 
-                        // Exibe o tempo restante
+                        // Exibe o tempo restante no elemento correto
                         document.getElementById('session-timer').textContent =
                             `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                     }
@@ -103,4 +110,5 @@
 
         // Executa a função imediatamente ao carregar a página
         updateSessionTimer();
+    }
 </script>
