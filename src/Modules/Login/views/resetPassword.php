@@ -2,14 +2,12 @@
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use App\Core\FlashMessages;
+
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-
-$messages = FlashMessages::getFlash();
 ?>
 
 <!DOCTYPE html>

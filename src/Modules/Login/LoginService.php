@@ -3,7 +3,6 @@
 namespace App\Modules\Login;
 
 use App\Core\Database;
-use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
 use App\Core\MessageHandler;
 use PDO;
