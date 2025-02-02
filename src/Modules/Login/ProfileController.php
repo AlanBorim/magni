@@ -2,8 +2,8 @@
 
 namespace App\Modules\Login;
 
-use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
+use App\Core\MessageHandler;
 use App\Core\Security;
 use App\Core\Roles;
 use App\Modules\Login\ProfileService;
@@ -24,21 +24,18 @@ class ProfileController
         $format = 'Y-m-d';
 
         if (empty($_REQUEST['name']) || !preg_match("/^[\p{L}\s]+$/u", $_REQUEST['name'])) {
-            FlashMessages::setFlash('danger', 'invalid_name', 'Nome inválido. Apenas letras e espaços são permitidos.');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('danger', 'invalid_name', 'Nome inválido. Apenas letras e espaços são permitidos.', "/{$currentLanguage}/profile");
             return;
         }
 
         if (!empty($_REQUEST['phone']) && !filter_var($_REQUEST['phone'], FILTER_VALIDATE_REGEXP, ["options" => ["regexp" => "/^\+?[0-9\s()-]{8,15}$/"]])) {
-            FlashMessages::setFlash('danger', 'invalid_phone', 'Telefone inválido.');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('danger', 'invalid_phone', 'Telefone inválido.', "/{$currentLanguage}/profile");
             return;
         }
 
         if (!is_null($_SESSION['roleId'])) {
             if (!in_array($_SESSION['roleId'], $validRoleIds)) {
-                FlashMessages::setFlash('danger', 'invalid_permissions', 'Permissão inválida.');
-                header("Location: /{$currentLanguage}/profile");
+                MessageHandler::redirectWithMessage('danger', 'invalid_permissions', 'Permissão inválida.', "/{$currentLanguage}/profile");
                 return;
             }
         }
@@ -48,8 +45,7 @@ class ProfileController
 
         // Verifica se a data é válida
         if (!$dateObject || $dateObject->format($format) !== $_REQUEST['nascimento']) {
-            FlashMessages::setFlash('danger', 'date_error', 'Data inválida');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('danger', 'date_error', 'Data inválida', "/{$currentLanguage}/profile");
             return;
         }
 
@@ -62,12 +58,11 @@ class ProfileController
             $_SESSION['role'] == 'admin' ? $_SESSION['roleId'] : null
         );
         if ($userUpdate) {
-            FlashMessages::setFlash('success', 'update_profile_success', 'Profile atualizado com sucesso');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('success', 'update_profile_success', 'Profile atualizado com sucesso', "/{$currentLanguage}/profile");
             return;
+            
         } else {
-            FlashMessages::setFlash('danger', 'update_profile_error', 'Erro ao atualizar o perfil');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('danger', 'update_profile_error', 'Erro ao atualizar o perfil', "/{$currentLanguage}/profile");
             return;
         }
     }
@@ -91,8 +86,7 @@ class ProfileController
 
         // Valida se as novas senhas coincidem
         if ($newPassword !== $confirmPassword) {
-            FlashMessages::setFlash('danger', 'password_dont_match', 'As novas senhas não coincidem.');
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('danger', 'password_dont_match', 'As novas senhas não coincidem.',"/{$currentLanguage}/profile");
             return;
         }
 
@@ -101,14 +95,11 @@ class ProfileController
 
         // Verifica o resultado e apresenta mensagens apropriadas
         if ($result['success'] == 'password_ok') {
-            FlashMessages::setFlash('success', $result['success'], $result['message']);
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('success', $result['success'], $result['message'],"/{$currentLanguage}/profile");
             return;
         } else {
             if (in_array($result['success'], $errors)) {
-
-                FlashMessages::setFlash('danger', $result['success'], $result['message']);
-                header("Location: /{$currentLanguage}/profile");
+                MessageHandler::redirectWithMessage('danger', $result['success'], $result['message'],"/{$currentLanguage}/profile");
                 return;
             }
         }
@@ -126,20 +117,19 @@ class ProfileController
         ];
 
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
-        
+
         $result = ProfileService::updateProfilePicture($_SESSION['user_id'], $_FILES['profile_picture']);
 
         // Verifica o resultado e apresenta mensagens apropriadas
         if ($result['success'] == 'save_ok') {
-            FlashMessages::setFlash('success', $result['success'], $result['message']);
-            header("Location: /{$currentLanguage}/profile");
+            MessageHandler::redirectWithMessage('success', $result['success'], $result['message'],"/{$currentLanguage}/profile");
             return;
+            
         } else {
             if (in_array($result['success'], $errors)) {
-
-                FlashMessages::setFlash('danger', $result['success'], $result['message']);
-                header("Location: /{$currentLanguage}/profile");
+                MessageHandler::redirectWithMessage('danger', $result['success'], $result['message'],"/{$currentLanguage}/profile");
                 return;
+                
             }
         }
     }

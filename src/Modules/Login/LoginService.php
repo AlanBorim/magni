@@ -5,6 +5,7 @@ namespace App\Modules\Login;
 use App\Core\Database;
 use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
+use App\Core\MessageHandler;
 use PDO;
 use Exception;
 
@@ -115,9 +116,8 @@ class LoginService
         $row = $stmt->fetch();
 
         if (!$row) {
-            FlashMessages::setFlash('danger', 'invalid_token', 'Token inválido ou expirado.');
-            header("Location: /{$currentLanguage}/reset-password");
-            exit;
+            MessageHandler::redirectWithMessage('danger', 'invalid_token', 'Token inválido ou expirado.', "/{$currentLanguage}/reset-password?token={$token}");
+            return;
         }
 
         // Atualiza a senha do usuário
@@ -126,18 +126,16 @@ class LoginService
         $updateStmt->execute(['password' => $hashedPassword, 'userId' => $row['id']]);
 
         if ($updateStmt->rowCount() === 0) {
-            FlashMessages::setFlash('danger', 'password_change_error', 'Erro ao atualizar a senha. Tente novamente.');
-            header("Location: /{$currentLanguage}/reset-password?token=$token");
-            exit;
+            MessageHandler::redirectWithMessage('danger', 'password_change_error', 'Erro ao atualizar a senha. Tente novamente.', "/{$currentLanguage}/reset-password?token={$token}");
+            return;
         }
 
         // Remove o token usado
         $deleteStmt = $db->prepare('DELETE FROM password_resets WHERE token = :token');
         $deleteStmt->execute(['token' => $token]);
 
-        FlashMessages::setFlash('success', 'password_chenge_success', 'Senha redefinida com sucesso. Você já pode fazer login.');
-        header("Location: /{$currentLanguage}/");
-        exit;
+        MessageHandler::redirectWithMessage('success', 'password_chenge_success', 'Senha redefinida com sucesso. Você já pode fazer login.', "/{$currentLanguage}/");
+        return;
     }
 
     /**

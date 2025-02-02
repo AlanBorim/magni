@@ -19,8 +19,7 @@ class Security
         self::initializeSession();
 
         if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] != $userId) {
-            FlashMessages::setFlash('danger', 'start_2fa_error', 'Ocorreu um erro no start 2fa');
-            self::redirectTo('/');
+            MessageHandler::redirectWithMessage('danger', 'start_2fa_error', 'Ocorreu um erro no start 2fa','/');
         }
 
         if ($twoFactorCode) {
@@ -99,8 +98,8 @@ class Security
         if ($currentPage === 'dashboard') {
             if (SessionManager::isSessionExpired()) {
                 SessionManager::destroySession();
-                FlashMessages::setFlash('error', 'session_expired', 'Sua sessão expirou. Faça login novamente.');
-                self::redirectTo('/');
+                MessageHandler::redirectWithMessage('error', 'session_expired', 'Sua sessão expirou. Faça login novamente.','/');
+                
             } else {
                 SessionManager::refreshSession(); // Renova o tempo de inatividade
             }

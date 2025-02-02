@@ -2,14 +2,13 @@
 
 namespace App\Modules\Login;
 
-use App\Core\FlashMessages;
 use App\Core\LanguageDetector;
 use App\Core\TokenGenerator;
 use App\Core\MailService;
 use App\Core\Security;
 use App\Core\SessionManager;
 use App\Modules\Login\LoginService;
-
+use App\Core\MessageHandler;
 
 use Exception;
 use RobThree\Auth\TwoFactorAuth;
@@ -22,9 +21,6 @@ class LoginController
 
     public function showLogin()
     {
-        session_start();
-        $error = $_SESSION['login_error'] ?? null;
-        unset($_SESSION['login_error']); // Limpa a mensagem após exibir
         include __DIR__ . '/views/login.php';
     }
 
@@ -32,7 +28,7 @@ class LoginController
     {
         session_start();
         if (empty($_SESSION['user_id'])) {
-            header("Location: /");
+            MessageHandler::redirectWithMessage('danger', 'not_connected', 'Usuario não conectado.', '/');
             return;
         }
 
@@ -60,7 +56,8 @@ class LoginController
         $token = $_REQUEST['token'] ?? null;
 
         if (!$token) {
-            FlashMessages::setFlash('danger', 'forgot_password_token_not_present', 'Token inválido ou ausente.');
+            MessageHandler::redirectWithMessage('danger', 'forgot_password_token_not_present', 'Token ausente.', '/login');
+            return;
         }
 
         $loginService = new LoginService();
@@ -69,7 +66,8 @@ class LoginController
         $user = $loginService->findByResetToken($token);
 
         if (!$user) {
-            FlashMessages::setFlash('danger', 'forgot_password_token_expired', 'Token inválido ou ausente.');
+            MessageHandler::redirectWithMessage('danger', 'forgot_password_token_expired', 'Token inválido.', '/login');
+            return;
         }
 
         // Renderize o formulário de redefinição de senha
@@ -98,48 +96,35 @@ class LoginController
         $confirmPassword = $_REQUEST['confirm_password'] ?? null;
 
         if (!$token) {
-            FlashMessages::setFlash('danger', 'forgot_password_invalid_token', 'Token não fornecido!');
-            header("Location: /{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'forgot_password_invalid_token', 'Token não fornecido!', "/{$currentLanguage}/");
             return;
         }
 
         if (!$resetData->findByResetToken($token)) {
-            FlashMessages::setFlash('danger', 'forgot_password_invalid_token', 'Token inválido ou expirado.');
-            header("Location: /{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'forgot_password_invalid_token', 'Token inválido ou expirado.', "/{$currentLanguage}/");
             return;
         }
 
         if (empty($password)) {
-            FlashMessages::setFlash('danger', 'general', 'A senha está vazia.');
-            // Redireciona para a página de redefinição com o token intacto
-            header("Location: /{$currentLanguage}/reset-password?token=$token");
+            MessageHandler::redirectWithMessage('danger', 'general', 'A senha está vazia.', "/{$currentLanguage}/reset-password?token={$token}");
             return;
         }
 
         if (strlen($password) < 8) {
-            FlashMessages::setFlash('danger', 'general', 'A senha deve ter pelo menos 8 caracteres.');
-            // Redireciona para a página de redefinição com o token intacto
-            header("Location: /{$currentLanguage}/reset-password?token=$token");
+            MessageHandler::redirectWithMessage('danger', 'general', 'A senha deve ter pelo menos 8 caracteres.', "/{$currentLanguage}/reset-password?token={$token}");
             return;
         }
 
         if ($password !== $confirmPassword) {
-            FlashMessages::setFlash('danger', 'general', 'As senhas não coincidem.');
-            // Redireciona para a página de redefinição com o token intacto
-            header("Location: /{$currentLanguage}/reset-password?token=$token");
+            MessageHandler::redirectWithMessage('danger', 'general', 'As senhas não coincidem.', "/{$currentLanguage}/reset-password?token={$token}");
             return;
         }
 
         try {
             // Tenta redefinir a senha usando o serviço
             $resetData->resetPassword($token, $password);
-
-            FlashMessages::setFlash('success', 'change_successfull', 'Senha redefinida com sucesso. Você já pode fazer login.');
-            header("Location: /{$currentLanguage}/");
-            return;
         } catch (Exception $e) {
-            FlashMessages::setFlash('danger', 'change_error', 'Ocorreu um erro ao redefinir a senha: ' . $e->getMessage());
-            header("Location: /{$currentLanguage}/reset-password?token=$token");
+            MessageHandler::redirectWithMessage('danger', 'change_error', 'Ocorreu um erro ao redefinir a senha: ' . $e->getMessage(), "/{$currentLanguage}/reset-password?token={$token}");
             return;
         }
     }
@@ -152,16 +137,14 @@ class LoginController
             $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
 
             if (!$email) {
-                FlashMessages::setFlash('danger', 'forgot_password_invalid_mail', 'E-mail inválido!');
-                header("Location: /{$currentLanguage}/forgot-password");
+                MessageHandler::redirectWithMessage('danger', 'forgot_password_invalid_mail', 'E-mail inválido!', "/{$currentLanguage}/forgot-password");
                 return;
             }
 
             $user = new LoginService();
             $userData = $user->findByEmail($email);
             if (!$userData) {
-                FlashMessages::setFlash('danger', 'forgot_password_mail_not_found', 'E-mail não encontrado');
-                header("Location: /{$currentLanguage}/forgot-password");
+                MessageHandler::redirectWithMessage('danger', 'forgot_password_mail_not_found', 'E-mail não encontrado', "/{$currentLanguage}/forgot-password");
                 return;
             }
 
@@ -169,8 +152,7 @@ class LoginController
             $token = TokenGenerator::generate();
 
             if (!$user->insertResetToken($token, $userData['id'])) {
-                FlashMessages::setFlash('danger', 'forgot_password_token_not_inserted', 'Impossível criar token de redefinição de senha!');
-                header("Location: /{$currentLanguage}/forgot-password");
+                MessageHandler::redirectWithMessage('danger', 'forgot_password_token_not_inserted', 'Impossível criar token de redefinição de senha!', "/{$currentLanguage}/forgot-password");
                 return;
             }
 
@@ -187,14 +169,10 @@ class LoginController
 
 
             if (MailService::send($email, $subject, $message)) {
-
-                FlashMessages::setFlash('success', 'forgot_password_success', 'Um link de redefinição foi enviado para o seu e-mail.');
-                header("Location: /{$currentLanguage}/forgot-password");
+                MessageHandler::redirectWithMessage('success', 'forgot_password_success', 'Um link de redefinição foi enviado para o seu e-mail.', "/{$currentLanguage}/forgot-password");
                 return;
             } else {
-
-                FlashMessages::setFlash('danger', 'forgot_password_error', 'Falha ao enviar o e-mail. Tente novamente mais tarde.');
-                header("Location: /{$currentLanguage}/forgot-password");
+                MessageHandler::redirectWithMessage('danger', 'forgot_password_error', 'Falha ao enviar o e-mail. Tente novamente mais tarde.', "/{$currentLanguage}/forgot-password");
                 return;
             }
         }
@@ -212,20 +190,16 @@ class LoginController
         $user = $loginService->validateUser($email, $password);
 
         if (!$user) {
-            FlashMessages::setFlash('danger', 'access_error', 'Usuário ou senha inválidos.');
-            header("Location: /{$currentLanguage}/");
-            exit; // Garante a interrupção imediata
+            MessageHandler::redirectWithMessage('danger', 'access_error', 'Usuário ou senha inválidos.', "/{$currentLanguage}/");
+            return;
         }
 
         // Define os dados da sessão usando SessionManager
         try {
             SessionManager::initializeUserSession($user);
         } catch (RuntimeException $e) {
-            // Log de erro e tratamento de falha na sessão
-            error_log("Erro na sessão: " . $e->getMessage());
-            FlashMessages::setFlash('danger', 'session_error', 'Erro ao iniciar a sessão.' . $e->getMessage());
-            header("Location: /{$currentLanguage}/");
-            exit;
+            MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão.' . $e->getMessage(), "/{$currentLanguage}/");
+            return;
         }
 
         // Atualiza o último login
@@ -233,10 +207,9 @@ class LoginController
 
         // Verifica se a conta está ativada
         if ($user['activated'] == '0') {
-            FlashMessages::setFlash('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.');
             SessionManager::destroySession(); // Limpeza imediata
-            header("Location: /{$currentLanguage}/");
-            exit;
+            MessageHandler::redirectWithMessage('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.', "/{$currentLanguage}/");
+            return;
         }
 
         // Controle de 2FA
@@ -257,8 +230,7 @@ class LoginController
         $code = $_REQUEST['two_factor_code'] ?? '';
 
         if (empty($code)) {
-            FlashMessages::setFlash('danger', 'empty_2fa', 'Código 2FA vazio.');
-            header("Location: /{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'empty_2fa', 'Código 2FA vazio.', "/{$currentLanguage}/");
             return;
         }
 
@@ -268,8 +240,7 @@ class LoginController
             $_SESSION['2fa_pending'] = false;
             header("Location: /{$currentLanguage}/dashboard");
         } else {
-            FlashMessages::setFlash('danger', 'invalid_2fa', 'Código 2FA inválido.');
-            header("Location: /{$currentLanguage}/two-factor");
+            MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
             return;
         }
     }
@@ -287,36 +258,30 @@ class LoginController
 
             // Validações de nome
             if (empty($userData['name'])) {
-                FlashMessages::setFlash('danger', 'required_name', 'O nome é obrigatório.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'required_name', 'O nome é obrigatório.', "/{$currentLanguage}/register");
                 return;
             }
 
             if (empty($userData['name']) || !preg_match("/^[\p{L}\s]+$/u", $userData['name'])) {
-                FlashMessages::setFlash('danger', 'invalid_name', 'Nome inválido. Apenas letras e espaços são permitidos.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'invalid_name', 'Nome inválido. Apenas letras e espaços são permitidos.', "/{$currentLanguage}/register");
                 return;
             }
 
             // Validação de e-mail
             if (empty($userData['email'])) {
-                FlashMessages::setFlash('danger', 'required_name', 'O e-mail é obrigatório.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'required_name', 'O e-mail é obrigatório.', "/{$currentLanguage}/register");
                 return;
             } elseif (!filter_var($userData['email'], FILTER_VALIDATE_EMAIL)) {
-                FlashMessages::setFlash('danger', 'invalid_email', 'E-mail inválido.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'invalid_email', 'E-mail inválido.', "/{$currentLanguage}/register");
                 return;
             }
 
             // Validação de senha
             if (empty($userData['password'])) {
-                FlashMessages::setFlash('danger', 'password_required', 'Senha é obrigatória');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'password_required', 'Senha é obrigatória', "/{$currentLanguage}/register");
                 return;
             } elseif ($userData['password'] !== $userData['confirmPassword']) {
-                FlashMessages::setFlash('danger', 'password_not_match', 'As senhas não coincidem.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'password_not_match', 'As senhas não coincidem.', "/{$currentLanguage}/register");
                 return;
             }
 
@@ -327,8 +292,7 @@ class LoginController
                 $loginService = new LoginService();
 
                 if ($loginService->findByEmail($userData['email'])) {
-                    FlashMessages::setFlash('danger', 'email_exist', 'E-mail já está registrado.');
-                    header("Location: /{$currentLanguage}/register");
+                    MessageHandler::redirectWithMessage('danger', 'email_exist', 'E-mail já está registrado.', "/{$currentLanguage}/register");
                     return;
                 } else {
 
@@ -347,18 +311,15 @@ class LoginController
                         );
 
                         if (!$emailSent) {
-                            FlashMessages::setFlash('danger', 'email_activation_error', 'Erro ao enviar o e-mail de ativação.');
-                            header("Location: /{$currentLanguage}/register");
+                            MessageHandler::redirectWithMessage('danger', 'email_activation_error', 'Erro ao enviar o e-mail de ativação.', "/{$currentLanguage}/register");
                             return;
                         }
                     }
-                    FlashMessages::setFlash('success', 'register_success', 'Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.');
-                    header("Location: /{$currentLanguage}/");
+                    MessageHandler::redirectWithMessage('success', 'register_success', 'Conta criada com sucesso. Verifique seu e-mail para ativar sua conta.', "/{$currentLanguage}/");
                     return;
                 }
             } catch (Exception $e) {
-                FlashMessages::setFlash('danger', 'register_error', 'Erro ao criar a conta: ' . $e->getMessage());
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'register_error', 'Erro ao criar a conta: ' . $e->getMessage(), "/{$currentLanguage}/");
                 return;
             }
         }
@@ -381,13 +342,11 @@ class LoginController
             if ($loginService->updateEnable2fa($_SESSION['user_id'])) {
 
                 $_SESSION['two_factor_enabled'] = 1;
-                FlashMessages::setFlash('success', 'secret_ok', '2FA habilitado com sucesso.');
-                header("Location: /{$currentLanguage}/enable2fa");
+                MessageHandler::redirectWithMessage('success', 'secret_ok', '2FA habilitado com sucesso.', "/{$currentLanguage}/enable2fa");
                 return;
             }
         } else {
-            FlashMessages::setFlash('danger', 'invalid_secret', 'Código inválido. Tente novamente.');
-            header("Location: /{$currentLanguage}/enable2fa");
+            MessageHandler::redirectWithMessage('danger', 'invalid_secret', 'Código inválido. Tente novamente.', "/{$currentLanguage}/enable2fa");
             return;
         }
     }
@@ -429,17 +388,15 @@ class LoginController
             ";
 
             if (MailService::send($user['email'], 'Reenvio de Ativação da Conta', $message)) {
-                FlashMessages::setFlash('success', 'resent_activation_email', 'E-mail de ativação reenviado. Verifique sua caixa de entrada.');
-                header("Location: /{$currentLanguage}/");
+
+                MessageHandler::redirectWithMessage('success', 'resent_activation_email', 'E-mail de ativação reenviado. Verifique sua caixa de entrada.', "/{$currentLanguage}/");
                 return;
             } else {
-                FlashMessages::setFlash('danger', 'resent_activation_email_failure', 'Erro ao reenviar o e-mail de ativação. Tente novamente mais tarde.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'resent_activation_email_failure', 'Erro ao reenviar o e-mail de ativação. Tente novamente mais tarde.', "/{$currentLanguage}/");
                 return;
             }
         } else {
-            FlashMessages::setFlash('danger', 'resent_activation_email_not_found', 'Falha ao localizar o token entre em contato com o suporte.');
-            header("Location: /{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'resent_activation_email_not_found', 'Falha ao localizar o token entre em contato com o suporte.', "/{$currentLanguage}/");
             return;
         }
     }
@@ -452,17 +409,14 @@ class LoginController
             $loginService = new LoginService();
 
             if ($loginService->findByToken($_GET['token'])) {
-                FlashMessages::setFlash('success', 'activation_token_success', 'Conta ativada com sucesso.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('success', 'activation_token_success', 'Conta ativada com sucesso.', "/{$currentLanguage}/");
                 return;
             } else {
-                FlashMessages::setFlash('danger', 'activation_token_error', 'Erro ao ativar a conta.');
-                header("Location: /{$currentLanguage}/");
+                MessageHandler::redirectWithMessage('danger', 'activation_token_error', 'Erro ao ativar a conta.', "/{$currentLanguage}/");
                 return;
             }
         } else {
-            FlashMessages::setFlash('danger', 'activation_token_not_found', 'Token não fornecido.');
-            header("Location: /{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'activation_token_not_found', 'Token não fornecido.', "/{$currentLanguage}/");
             return;
         }
     }

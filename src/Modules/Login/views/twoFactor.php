@@ -2,13 +2,13 @@
 
 require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-use App\Core\FlashMessages;
+
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
-$messages = FlashMessages::getFlash();
 
+var_dump(session_status());
 ?>
 
 <!DOCTYPE html>
@@ -45,7 +45,9 @@ $messages = FlashMessages::getFlash();
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _("Twofa title") ?></h3>
-                        <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
+                        <?php 
+                        
+                        ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
                         <form method="POST" action="/<?= $currentLanguage; ?>/two-factor-check">
                             <div class="mb-3">
                                 <label for="code" class="form-label"><?= _("Twofa subtitle") ?></label>

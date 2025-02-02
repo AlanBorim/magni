@@ -4,9 +4,11 @@ require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
-
+use App\Core\FlashMessages;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
+
+
 ?>
 
 

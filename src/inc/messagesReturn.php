@@ -1,19 +1,31 @@
 <?php
 
-use App\Core\FlashMessages;
+use App\Core\MessageHandler;
 
-$messages = FlashMessages::getFlash();
-
-if (!empty($messages)) {
-    foreach ($messages as $type => $msgs) {
-        foreach ($msgs as $msg) {
-            if (array_keys($msgs)[0] == 'not_activated') {
-                $resend = 1; // Atualiza a referência
-            }
-            foreach ($msg as $txtMsg) {
-                echo "<div class='alert alert-$type'>" . $txtMsg . "</div>";
-            }
-        }
+// Captura mensagens de requisição GET
+if (isset($_GET['msg_type']) && isset($_GET['msg_var']) && isset($_GET['msg_text'])) {
+    $msgType = htmlspecialchars($_GET['msg_type']);
+    $msgVar = htmlspecialchars($_GET['msg_var']);
+    $msgText = htmlspecialchars(urldecode($_GET['msg_text']));
+    if ($msgVar == 'not_activated') {
+        $resend = 1; // Atualiza a referência
     }
+    echo "<div class='alert alert-{$msgType}'>{$msgText}</div>";
 }
 
+// Captura mensagens armazenadas localmente
+$messages = MessageHandler::getMessages();
+foreach ($messages as $msg) {
+    if ($msg['var'] == 'not_activated') {
+        $resend = 1; // Atualiza a referência
+    }
+    echo "<div class='alert alert-{$msg['type']}'>{$msg['message']}</div>";
+}
+
+/**
+ * Toda vez que precisar apresentar mensagens na mesma página utiliza-se o trecho
+ * use App\Core\MessageHandler;
+ *
+ * MessageHandler::addMessage('success', 'Usuário cadastrado com sucesso!');
+ *
+ */
