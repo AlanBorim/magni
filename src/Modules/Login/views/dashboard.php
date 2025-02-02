@@ -89,7 +89,7 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
                             <div class="card-body text-center">
                                 <h5 class="card-title">Criar Empresa</h5>
                                 <p class="card-text">Cadastre sua empresa para acessar funcionalidades exclusivas.</p>
-                                <a href="criarEmpresas.php" class="btn btn-primary">Criar Empresa</a>
+                                <a href="/<?= $currentLanguage ?>/company/registerCompany" class="btn btn-primary">Criar Empresa</a>
                             </div>
                         </div>
                     </div>
