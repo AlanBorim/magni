@@ -8,7 +8,6 @@ use App\Core\LanguageDetector;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-var_dump(session_status());
 ?>
 
 <!DOCTYPE html>

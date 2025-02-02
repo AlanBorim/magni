@@ -36,7 +36,8 @@ $userData = $user->findById($_SESSION['user_id']);
             <div class="col-md-4">
                 <div class="card">
                     <div class="card-body text-center">
-                        <img src="<?= htmlspecialchars($userData['profile_picture'] ?? '../public/assets/images/150.png') ?>"
+                    
+                        <img src="<?= htmlspecialchars($userData['profile_picture_path'] ?? '../public/assets/images/150.png') ?>"
                             alt="Foto de Perfil"
                             class="rounded-circle mb-3"
                             style="width: 150px; height: 150px;">

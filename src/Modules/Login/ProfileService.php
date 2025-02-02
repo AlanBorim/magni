@@ -127,13 +127,14 @@ class ProfileService
         $currentPicture = $stmt->fetchColumn();
 
         // Remove o arquivo da imagem atual, se existir
-
-        if (file_exists(__DIR__ . $currentPicture)) {
-            if (!unlink(__DIR__ . $currentPicture)) {
-                error_log("Falha ao remover o arquivo: $currentPicture");
+        if (!is_null($currentPicture)) {
+            if (file_exists(__DIR__ . $currentPicture)) {
+                if (!unlink(__DIR__ . $currentPicture)) {
+                    error_log("Falha ao remover o arquivo: $currentPicture");
+                }
+            } else {
+                error_log("Arquivo não encontrado ou caminho inválido:" . __DIR__ . $currentPicture);
             }
-        } else {
-            error_log("Arquivo não encontrado ou caminho inválido:" . __DIR__ . $currentPicture);
         }
 
         // Tipos de imagem permitidos
@@ -157,7 +158,7 @@ class ProfileService
         }
 
         // Criar o caminho para salvar a imagem
-        $uploadDir = __DIR__ . '/../../../../public/assets/images/profile_pictures/';
+        $uploadDir = __DIR__ . '/../../../public/assets/images/profile_pictures/';
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true); // Cria o diretório se não existir
         }
@@ -175,7 +176,7 @@ class ProfileService
         }
 
         // Caminho relativo para armazenar no banco
-        $relativePath = '/../../../../public/assets/images/profile_pictures/' . $fileName;
+        $relativePath = '/../../../public/assets/images/profile_pictures/' . $fileName;
 
         // Atualizar o caminho da imagem no banco de dados
         $stmt = self::$db->prepare("UPDATE users SET profile_picture_path = :profile_picture_path WHERE id = :user_id");
