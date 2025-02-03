@@ -1,5 +1,13 @@
 RewriteEngine On
 
+# Garante que o header Authorization seja repassado corretamente ao PHP
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+# Permite todos os headers necessários
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Headers "Authorization, Content-Type"
+Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS"
+
 # Permitir acesso direto a arquivos e diretórios existentes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
