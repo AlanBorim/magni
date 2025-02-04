@@ -13,12 +13,14 @@
     "autoload": {
         "psr-4": {
             "App\\": "src/"
-        }
+        },
+        "files": [
+            "src/Core/Helpers/Helper.php"
+        ]
     },
     "scripts": {
         "post-install-cmd": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "php src/Core/ServiceLoader.php"
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
         ]
     },
     "config": {

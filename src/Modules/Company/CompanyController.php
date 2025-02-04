@@ -4,6 +4,7 @@ namespace App\Modules\Company;
 
 use App\Core\Database;
 use App\Core\MessageHandler;
+use App\Core\Security;
 use App\Modules\Company\CompanyService;
 use App\Modules\Company\CompanyRepository;
 
@@ -29,7 +30,9 @@ class CompanyController
      */
     public function processRegisterCompany()
     {
-        session_start();
+        Security::enforceSessionSecurity();
+        var_dump($_POST,$_SESSION);exit;
+        
         if (!isset($_SESSION['user_id'])) {
             MessageHandler::redirectWithMessage('danger','company_not_logged', 'Você precisa estar logado para criar uma empresa.', '/login');
         }

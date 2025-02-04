@@ -30,7 +30,7 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/menu.php'); ?>
     <div class="container mt-5">
     <h2>Cadastro de Empresa</h2>
-    <form id="empresaForm" enctype="multipart/form-data">
+    <form id="empresaForm" enctype="multipart/form-data" method="post" action="/<?=$currentLanguage?>/company/register">
         <div class="row mb-3">
             <!-- Company Name -->
             <div class="col-md-6">
