@@ -5,15 +5,16 @@ require_once __DIR__ . '/../../../../vendor/autoload.php';
 
 use App\Core\ViewHelper;
 use App\Core\LanguageDetector;
-use App\Core\Security;
+use App\Core\SessionManager;
 use App\Modules\Login\LoginService;
 
-Security::enforceSessionSecurity();
+
+$user_id = SessionManager::get('user_id');
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
 $user = new LoginService();
-$userData = $user->findById($_SESSION['user_id']);
+$userData = $user->findById($user_id);
 ?>
 
 <!DOCTYPE html data-bs-theme="light">
@@ -95,7 +96,7 @@ $userData = $user->findById($_SESSION['user_id']);
                                 <label for="nascimento" class="form-label">Data de nascimento</label>
                                 <input type="date" class="form-control" id="nascimento" name="nascimento" value="<?= $userData['nascimento'] ?? null ?>" required>
                             </div>
-                            <?php if ($_SESSION['role'] == 'admin') { ?>
+                            <?php if (SessionManager::get('role') == 'admin') { ?>
                                 <div class="mb-3">
                                     <label for="role" class="form-label"><?= _('Profile form permissions') ?></label>
                                     <select class="form-select" id="role" name="role" required>
@@ -148,7 +149,7 @@ $userData = $user->findById($_SESSION['user_id']);
                                 <label class="form-check-label" for="notify_email"><?= _('Profile settings email') ?></label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" id="tfa" name="tfa" <?= $_SESSION['two_factor_enabled'] ? 'checked' : '' ?>>
+                                <input class="form-check-input" type="checkbox" id="tfa" name="tfa" <?= SessionManager::get('two_factor_enabled') ? 'checked' : '' ?>>
                                 <label class="form-check-label" for="tfa"><?= _('Profile settings 2fa') ?></label>
                             </div>
                             <div class="form-check form-switch">

@@ -26,12 +26,12 @@ class LoginController
 
     public function showDashboard()
     {
-        session_start();
-        if (empty($_SESSION['user_id'])) {
+        // Verifica se o usuário está autenticado
+        if (!SessionManager::get('user_id')) {
             MessageHandler::redirectWithMessage('danger', 'not_connected', 'Usuario não conectado.', '/');
             return;
         }
-
+        
         include __DIR__ . '/views/dashboard.php';
     }
 
@@ -194,21 +194,28 @@ class LoginController
             return;
         }
 
-        // Define os dados da sessão usando SessionManager
-        try {
-            SessionManager::initializeUserSession($user);
-        } catch (RuntimeException $e) {
-            MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão.' . $e->getMessage(), "/{$currentLanguage}/");
+        // Verifica se a conta está ativada antes de criar a sessão
+        if ($user['activated'] == '0') {
+            MessageHandler::redirectWithMessage('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.', "/{$currentLanguage}/");
             return;
         }
 
-        // Atualiza o último login
-        LoginService::updateLastLogin($user['id']);
+        try {
+            // Define os dados da sessão usando SessionManager
+            SessionManager::initializeUserSession($user);
 
-        // Verifica se a conta está ativada
-        if ($user['activated'] == '0') {
-            SessionManager::destroySession(); // Limpeza imediata
-            MessageHandler::redirectWithMessage('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.', "/{$currentLanguage}/");
+            // Valida se a sessão foi realmente criada
+            if (!SessionManager::get('user_id')) {
+                throw new RuntimeException("Falha ao definir a sessão do usuário.");
+            }
+
+            // Atualiza o último login do usuário
+            LoginService::updateLastLogin($user['id']);
+
+            // Teste para verificar se os cookies armazenaram os dados corretamente
+            error_log("Sessão Criada: " . json_encode($_COOKIE));
+        } catch (RuntimeException $e) {
+            MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão. ' . $e->getMessage(), "/{$currentLanguage}/");
             return;
         }
 
@@ -218,14 +225,16 @@ class LoginController
         } else {
             header("Location: /{$currentLanguage}/dashboard");
         }
+
         exit; // Sempre interrompe após redirecionamento
     }
+
 
     public function process2fa()
     {
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-        Security::enforceSessionSecurity();
+        #Security::enforceSessionSecurity();
 
         $code = $_REQUEST['two_factor_code'] ?? '';
 
@@ -234,15 +243,15 @@ class LoginController
             return;
         }
 
-        Security::startTwoFactorValidation($_SESSION['user_id'], $code);
+        // Security::startTwoFactorValidation($_SESSION['user_id'], $code);
 
-        if (Security::validateTwoFactorCode($code)) {
-            $_SESSION['2fa_pending'] = false;
-            header("Location: /{$currentLanguage}/dashboard");
-        } else {
-            MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
-            return;
-        }
+        // if (Security::validateTwoFactorCode($code)) {
+        //     $_SESSION['2fa_pending'] = false;
+        //     header("Location: /{$currentLanguage}/dashboard");
+        // } else {
+        //     MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
+        //     return;
+        // }
     }
 
     public function processRegister()
@@ -328,7 +337,7 @@ class LoginController
     public function processEnable2fa()
     {
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
-        Security::enforceSessionSecurity();
+        #Security::enforceSessionSecurity();
 
         $userInputCode = $_REQUEST['two_factor_code'];
 
@@ -424,7 +433,7 @@ class LoginController
     public function getQrCode2fa()
     {
 
-        Security::enforceSessionSecurity();
+        #Security::enforceSessionSecurity();
 
         $tfa = new TwoFactorAuth();
         // Gerar chave secreta única para o usuário

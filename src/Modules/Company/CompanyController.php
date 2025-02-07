@@ -7,6 +7,7 @@ use App\Core\MessageHandler;
 use App\Core\Security;
 use App\Modules\Company\CompanyService;
 use App\Modules\Company\CompanyRepository;
+use App\Modules\Login\LoginController;
 
 class CompanyController
 {
@@ -50,43 +51,28 @@ class CompanyController
         MessageHandler::redirectWithMessage('success','company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
     }
 
-    /**
-     * Exibe a dashboard específica da empresa
-     */
-    public function showDashboard($slug)
+    public function handleCompanyAccess($companySlug)
     {
-        $company = $this->companyService->getCompanyBySlug($slug);
+        session_start();
+
+        // Verifica se a empresa existe
+        $companyService = new CompanyService();
+        $company = $companyService->findBySlug($companySlug);
+
         if (!$company) {
-            MessageHandler::redirectWithMessage('danger','comapny_not_found', 'Empresa não encontrada.', '/');
+            http_response_code(404);
+            echo "Empresa não encontrada!";
+            exit;
         }
 
-        include __DIR__ . '/../Views/dashboard.php';
-    }
-
-    /**
-     * Exibe a página de configurações da empresa
-     */
-    public function showSettings($slug)
-    {
-        $company = $this->companyService->getCompanyBySlug($slug);
-        if (!$company) {
-            MessageHandler::redirectWithMessage('danger','comapny_not_found', 'Empresa não encontrada.', '/');
+        // Se o usuário estiver logado, redireciona para a dashboard da empresa
+        if (!empty($_SESSION['user_id'])) {
+            header("Location: /{$companySlug}/dashboard");
+            exit;
         }
 
-        include __DIR__ . '/../Views/settings.php';
-    }
-
-    /**
-     * Atualiza as configurações da empresa
-     */
-    public function updateSettings($slug)
-    {
-        $company = $this->companyService->getCompanyBySlug($slug);
-        if (!$company) {
-            MessageHandler::redirectWithMessage('danger','comapny_not_found', 'Empresa não encontrada.', '/');
-        }
-
-        $this->companyService->updateCompanySettings($company['id'], $_POST);
-        MessageHandler::redirectWithMessage('success','company_update_success', 'Configurações atualizadas!', "/company/$slug/settings");
+        // Se não estiver logado, direciona para a tela de login da empresa
+        $loginController = new LoginController();
+        $loginController->showLogin($companySlug);
     }
 }

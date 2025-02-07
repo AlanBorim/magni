@@ -62,4 +62,22 @@ class Helper
         $string = preg_replace('/-+/', '-', $string);
         return trim($string, '-');
     }
+
+    /**
+     * Obtém os dados de localização através do ip do usuário
+     */
+    public static function getCountryByIPv6($ip)
+    {
+        $apiKey = "9a655cb6aae09c"; // Opcional (ipinfo.io pode ter limite de requisições)
+        $url = "https://ipinfo.io/{$ip}/json?token={$apiKey}";
+    
+        $response = @file_get_contents($url);
+        if ($response) {
+            $data = json_decode($response, true);
+            return $data['country'] ?? 'Não encontrado';
+        }
+    
+        return 'Erro ao consultar API';
+    }
+
 }

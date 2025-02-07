@@ -2,76 +2,123 @@
 
 namespace App\Core;
 
+use App\Core\Helpers\Helper;
+
 class SessionManager
 {
-    // Tempo de expiração da sessão em segundos (30 minutos)
-    private const SESSION_EXPIRE_TIME = 1800;
+    private const COOKIE_LIFETIME = 1800; // 30 minutos
+    private const SESSION_NAME = 'MAGNI_SESSION';
+
+    
+    /**
+     * Define um valor na sessão (salva nos cookies).
+     */
+    public static function set(string $key, $value): void
+    {
+        $sessionData = self::getSessionData() ?? [
+            'session_id' => bin2hex(random_bytes(32)),
+            'user_ip' => Helper::getClientIP(),
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'session_expire' => time() + self::COOKIE_LIFETIME,
+            'data' => []
+        ];
+
+        $sessionData['data'][$key] = $value;
+        $sessionData['session_expire'] = time() + self::COOKIE_LIFETIME; // Atualiza tempo de expiração
+        self::setSessionCookie($sessionData);
+    }
 
     /**
-     * Inicializa a sessão se ainda não estiver ativa.
+     * Obtém um valor da sessão.
      */
-    private static function initializeSession(): void
+    public static function get(string $key, $default = null)
     {
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-            session_regenerate_id(true); // Regenera o ID da sessão para evitar fixation attacks
-        }
+        $sessionData = self::getSessionData();
+        return $sessionData['data'][$key] ?? $default;
+    }
 
-        // Define o tempo de expiração da sessão se ainda não estiver definido
-        if (!isset($_SESSION['session_expire'])) {
-            $_SESSION['session_expire'] = time() + self::SESSION_EXPIRE_TIME;
-        }
+    /**
+     * Remove um valor da sessão.
+     */
+    public static function remove(string $key): void
+    {
+        $sessionData = self::getSessionData();
 
-        // Define os dados de segurança do usuário
-        if (!isset($_SESSION['user_ip'])) {
-            $_SESSION['user_ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-        }
-        if (!isset($_SESSION['user_agent'])) {
-            $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+        if ($sessionData && isset($sessionData['data'][$key])) {
+            unset($sessionData['data'][$key]);
+            self::setSessionCookie($sessionData);
         }
     }
 
     /**
-     * Renova a sessão, atualizando o tempo de expiração e regenerando o ID.
+     * Destroi a sessão.
      */
-    public static function renewSession(): void
+    public static function destroySession(): void
     {
-        self::initializeSession();
-        session_regenerate_id(true);
-        $_SESSION['session_expire'] = time() + self::SESSION_EXPIRE_TIME;
+        setcookie(self::SESSION_NAME, "", time() - 3600, "/", "", true, true);
     }
 
     /**
-     * Verifica se a sessão expirou por inatividade.
-     *
-     * @return bool Retorna true se a sessão expirou.
+     * Verifica se a sessão está ativa e válida.
      */
-    public static function isSessionExpired(): bool
+    public static function isSessionValid(): bool
     {
-        self::initializeSession();
+        $sessionData = self::getSessionData();
 
-        return time() > $_SESSION['session_expire'];
+        if (!$sessionData) {
+            return false;
+        }
+
+        // Proteção contra hijacking
+        if ($sessionData['user_ip'] !== Helper::getClientIP() || $sessionData['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
+            return false;
+        }
+
+        return time() <= $sessionData['session_expire'];
     }
 
     /**
-     * Atualiza o tempo de atividade da sessão.
-     * Apenas será chamado quando o usuário estiver na dashboard.
+     * Obtém os dados da sessão a partir do cookie.
      */
-    public static function refreshSession(): void
+    private static function getSessionData(): ?array
     {
-        self::initializeSession();
-        $_SESSION['session_expire'] = time() + self::SESSION_EXPIRE_TIME;
+        if (!isset($_COOKIE[self::SESSION_NAME])) {
+            return null;
+        }
+
+        $sessionData = json_decode($_COOKIE[self::SESSION_NAME], true);
+
+        return is_array($sessionData) ? $sessionData : null;
     }
 
     /**
      * Retorna o tempo restante da sessão em segundos.
-     *
-     * @return int Tempo restante até a expiração.
      */
     public static function getRemainingSessionTime(): int
     {
-        self::initializeSession();
-        return max(0, $_SESSION['session_expire'] - time());
+        $sessionData = self::getSessionData();
+
+        if (!$sessionData || !isset($sessionData['session_expire'])) {
+            return 0; // Sessão não existe ou já expirou
+        }
+
+        return max(0, $sessionData['session_expire'] - time());
+    }
+
+    /**
+     * Define o cookie de sessão.
+     */
+    private static function setSessionCookie(array $sessionData): void
+    {
+        setcookie(
+            self::SESSION_NAME,
+            json_encode($sessionData),
+            time() + self::COOKIE_LIFETIME,
+            "/",
+            "",
+            true,
+            true
+        );
     }
 
     /**
@@ -79,26 +126,49 @@ class SessionManager
      */
     public static function initializeUserSession(array $user): void
     {
-        self::initializeSession();
+        $sessionData = self::getSessionData() ?? [
+            'session_id' => bin2hex(random_bytes(32)),
+            'user_ip' => Helper::getClientIP(),
+            'user_agent' => $_SERVER['HTTP_USER_AGENT'],
+            'session_expire' => time() + self::COOKIE_LIFETIME,
+            'data' => []
+        ];
 
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['role'] = $user['role'];
-        $_SESSION['roleName'] = $user['roleName'];
-        $_SESSION['roleId'] = $user['roleId'];
-        $_SESSION['two_factor_enabled'] = $user['two_factor_enabled'];
-        $_SESSION['is_2fa_verified'] = false;
-        $_SESSION['user_ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
-        $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+        // Define os dados do usuário na sessão via cookies
+        $sessionData['data']['user_id'] = $user['id'];
+        $sessionData['data']['role'] = $user['role'];
+        $sessionData['data']['roleName'] = $user['roleName'];
+        $sessionData['data']['roleId'] = $user['roleId'];
+        $sessionData['data']['two_factor_enabled'] = $user['two_factor_enabled'];
+        $sessionData['data']['is_2fa_verified'] = false;
+        $sessionData['data']['user_ip'] = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'];
+        $sessionData['data']['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+
+        // Atualiza o tempo de expiração da sessão
+        $sessionData['session_expire'] = time() + self::COOKIE_LIFETIME;
+
+        self::setSessionCookie($sessionData);
     }
 
     /**
-     * Destrói a sessão e remove todas as variáveis.
+     * Verifica se a sessão expirou.
      */
-    public static function destroySession(): void
+    public static function isSessionExpired(): bool
     {
-        if (session_status() === PHP_SESSION_ACTIVE) {
-            session_unset();
-            session_destroy();
+        $sessionData = self::getSessionData();
+        return !$sessionData || time() > $sessionData['session_expire'];
+    }
+
+    /**
+     * Renova a sessão do usuário.
+     */
+    public static function renewSession(): void
+    {
+        $sessionData = self::getSessionData();
+
+        if ($sessionData) {
+            $sessionData['session_expire'] = time() + self::COOKIE_LIFETIME;
+            self::setSessionCookie($sessionData);
         }
     }
 }

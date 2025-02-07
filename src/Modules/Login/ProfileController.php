@@ -6,6 +6,7 @@ use App\Core\LanguageDetector;
 use App\Core\MessageHandler;
 use App\Core\Security;
 use App\Core\Roles;
+use App\Core\SessionManager;
 use App\Modules\Login\ProfileService;
 
 
@@ -13,6 +14,8 @@ use DateTime;
 
 class ProfileController
 {
+
+    
     public function processUpdateProfile()
     {
         Security::initializeSessionSecurity();
@@ -33,8 +36,8 @@ class ProfileController
             return;
         }
 
-        if (!is_null($_SESSION['roleId'])) {
-            if (!in_array($_SESSION['roleId'], $validRoleIds)) {
+        if (!is_null(SessionManager::get('roleId'))) {
+            if (!in_array(SessionManager::get('roleId'), $validRoleIds)) {
                 MessageHandler::redirectWithMessage('danger', 'invalid_permissions', 'Permissão inválida.', "/{$currentLanguage}/profile");
                 return;
             }
@@ -53,9 +56,9 @@ class ProfileController
             $_REQUEST['name'],
             $_REQUEST['phone'],
             $_REQUEST['nascimento'],
-            $_SESSION['user_id'],
-            $_REQUEST['role'] ?? $_SESSION['roleId'],
-            $_SESSION['role'] == 'admin' ? $_SESSION['roleId'] : null
+            SessionManager::get('user_id'),
+            $_REQUEST['role'] ?? SessionManager::get('roleId'),
+            SessionManager::get('role') == 'admin' ? SessionManager::get('roleId') : null
         );
         if ($userUpdate) {
             MessageHandler::redirectWithMessage('success', 'update_profile_success', 'Profile atualizado com sucesso', "/{$currentLanguage}/profile");
@@ -69,7 +72,7 @@ class ProfileController
 
     public function processUpdateProfilePass()
     {
-        Security::enforceSessionSecurity();
+        Security::initializeSessionSecurity();
         $errors = [
             'user_not_found',
             'password_not_found',
@@ -91,7 +94,7 @@ class ProfileController
         }
 
         // Chama o método de atualização de senha
-        $result = ProfileService::updatePassword($_SESSION['user_id'], $currentPassword, $newPassword);
+        $result = ProfileService::updatePassword(SessionManager::get('user_id'), $currentPassword, $newPassword);
 
         // Verifica o resultado e apresenta mensagens apropriadas
         if ($result['success'] == 'password_ok') {
@@ -107,7 +110,7 @@ class ProfileController
 
     public function processUpdateProfilePic()
     {
-        Security::enforceSessionSecurity();
+        Security::initializeSessionSecurity();
         $errors = [
             'no_picture',
             'wrong_type',
@@ -118,7 +121,7 @@ class ProfileController
 
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-        $result = ProfileService::updateProfilePicture($_SESSION['user_id'], $_FILES['profile_picture']);
+        $result = ProfileService::updateProfilePicture(SessionManager::get('user_id'), $_FILES['profile_picture']);
 
         // Verifica o resultado e apresenta mensagens apropriadas
         if ($result['success'] == 'save_ok') {

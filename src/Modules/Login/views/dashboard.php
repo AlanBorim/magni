@@ -9,12 +9,15 @@ use App\Core\SessionManager;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-Security::enforceSessionSecurity();
-SessionManager::renewSession();
+// Verifica se o usuário está autenticado
+if (!SessionManager::get('user_id')) {
+    header("Location: /{$currentLanguage}/");
+    exit;
+}
 
-$role = $_SESSION['roleName']; // Permissões do usuário
-$twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável para verificar se o 2FA está habilitado
-
+// Recupera informações do usuário
+$role = SessionManager::get('roleName', 'guest'); // Se não houver, assume 'guest'
+$twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
 ?>
 
 <!DOCTYPE html>
@@ -35,15 +38,18 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
         <h3><?= _('Dash welcome') ?></h3>
         <p><?= _('Dash permission') ?> <strong><?= htmlspecialchars($role) ?></strong></p>
 
-        <!-- Verificação e notificação de 2FA -->
+        <!-- Notificação de 2FA -->
         <?php if (!$twoFactorEnabled): ?>
             <div class="alert alert-warning">
                 <strong><?= _('Dash Attention') ?></strong> <?= _('Dash 2fa') ?>
                 <a href="/<?= $currentLanguage ?>/enable2fa" class="btn btn-warning btn-sm"><?= _('Dash 2fa button') ?></a>
             </div>
         <?php endif; ?>
+
         <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
-        <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+
+        <!-- Se o usuário for Admin -->
+        <?php if ($role === 'admin'): ?>
             <div class="alert alert-info"><?= _('Dash permission desc') ?></div>
 
             <div class="container mt-4">
@@ -79,6 +85,7 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
                 </div>
             </div>
 
+        <!-- Se o usuário for cliente comum -->
         <?php else: ?>
             <div id="external-modals"></div>
             <div class="alert alert-warning"><?= _('Dash permission client') ?></div>
@@ -97,7 +104,6 @@ $twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável
             </div>
         <?php endif; ?>
     </div>
-
 
     <!-- Rodapé -->
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
