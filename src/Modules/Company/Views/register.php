@@ -9,17 +9,14 @@ use App\Core\ViewHelper;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-Security::enforceSessionSecurity();
-SessionManager::renewSession();
+Security::initializeSessionSecurity();
 
-$role = $_SESSION['roleName']; // Permissões do usuário
-$twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável para verificar se o 2FA está habilitado
+// Recupera informações do usuário
+$role = SessionManager::get('roleName', 'guest'); // Se não houver, assume 'guest'
+$twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
 
 $ip = Helper::getClientIP();
-
 $pais = Helper::getCountryByIPv6($ip);
-
-
 ?>
 
 <!DOCTYPE html>
@@ -30,9 +27,10 @@ $pais = Helper::getCountryByIPv6($ip);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Empresa</title>
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
+    
 </head>
 
-<body>
+<body data-country="<?= strtolower($pais) ?>" data-lang="<?= $currentLanguage ?>">
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/menu.php'); ?>
     <div class="container mt-5">
         <h2>Cadastro de Empresa</h2>
@@ -47,7 +45,7 @@ $pais = Helper::getCountryByIPv6($ip);
                 <div class="col-md-6">
                     <label for="cnpj" class="form-label">CNPJ</label>
                     <div class="d-flex">
-                        <input type="text" class="form-control me-2" id="cnpj" name="cnpj" placeholder="Digite o CNPJ" required>
+                        <input type="text" class="form-control me-2" id="cnpj" name="cnpj" placeholder="Digite o CNPJ">
                         <button type="button" class="btn btn-info" id="buscarCNPJ"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
@@ -71,20 +69,27 @@ $pais = Helper::getCountryByIPv6($ip);
                 </div>
                 <div class="col-md-6">
                     <label for="site" class="form-label">Website</label>
-                    <input type="url" class="form-control" id="site" name="site">
+                    <input type="text" class="form-control" id="site" name="site">
                 </div>
             </div>
 
             <!-- Telefone e País -->
             <div class="row mb-3">
-
                 <div class="col-md-3">
                     <label for="phoneNumber" class="form-label">Phone Number</label>
                     <input type="text" class="form-control" id="phoneNumber" name="phoneNumber">
                 </div>
-                <div class="col-md-1">
+                <div class="col-md-3">
                     <label for="country" class="form-label">Country</label>
-                    <input type="text" class="form-control" id="country" name="country" value="<?= $pais ?>">
+                    <select id="country" class="form-control">
+                        <!-- Lista de países -->
+                        <option value="AU" <?= $pais === "AU" ? "selected" : "" ?>>Australia</option>
+                        <option value="BR" <?= $pais === "BR" ? "selected" : "" ?>>Brazil</option>
+                        <option value="US" <?= $pais === "US" ? "selected" : "" ?>>United States</option>
+                        <option value="FR" <?= $pais === "FR" ? "selected" : "" ?>>France</option>
+                        <option value="DE" <?= $pais === "DE" ? "selected" : "" ?>>Germany</option>
+                        <!-- Adicione mais opções conforme necessário -->
+                    </select>
                 </div>
                 <div class="col-md-2">
                     <label for="state" class="form-label">State</label>
@@ -102,7 +107,6 @@ $pais = Helper::getCountryByIPv6($ip);
 
             <!-- Cidade e Endereço -->
             <div class="row mb-3">
-
                 <div class="col-md-4">
                     <label for="address" class="form-label">Address</label>
                     <input type="text" class="form-control" id="address" name="address">
@@ -128,8 +132,13 @@ $pais = Helper::getCountryByIPv6($ip);
             <!-- Descrição -->
             <div class="row mb-3">
                 <div class="col-md-12">
-                    <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    <label for="Description" class="form-label">Description</label>
+                    <textarea class="form-control" id="Description" name="Description" rows="5" readonly></textarea>
+                </div>
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-info mt-2" id="descriptionBtn">
+                        Gerar Descrição
+                    </button>
                 </div>
             </div>
 
@@ -140,110 +149,8 @@ $pais = Helper::getCountryByIPv6($ip);
         </form>
     </div>
 
-
-
     <!-- Script para Chamada à API -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const buscarCNPJButton = document.getElementById("buscarCNPJ");
-            const cnpjInput = document.getElementById("cnpj");
-            const companyNameInput = document.getElementById("companyName");
-            const phoneInput = document.getElementById("phoneNumber");
-            const siteInput = document.getElementById("site");
-            const countryInput = document.getElementById("country");
-
-            // Quadro de informações da empresa
-            const empresaInfoDiv = document.getElementById("empresaInfo");
-            const statusEmpresa = document.getElementById("statusEmpresa");
-            const atividadePrincipal = document.getElementById("atividadePrincipal");
-
-            buscarCNPJButton.addEventListener("click", function() {
-                let cnpj = cnpjInput.value.trim().replace(/\D/g, ""); // Remove caracteres não numéricos
-
-                // Validação do CNPJ
-                if (!/^\d{14}$/.test(cnpj)) {
-                    alert("Por favor, insira um CNPJ válido (14 números).");
-                    return;
-                }
-
-                // Monta a URL com a query string
-                const apiUrl = `/<?= $currentLanguage ?>/api/getData?url=https://www.receitaws.com.br/v1/cnpj/${cnpj}`;
-
-                // Chamada à API via GET
-                fetch(apiUrl, {
-                        method: "GET",
-                        headers: {
-                            "Authorization": "d40f92bbc08924f8c99f1a6e3b7a9d171c7870bf24b2210e4591fea92311ae64",
-                        },
-                    })
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Erro ao buscar dados do CNPJ.");
-                        }
-                        return response.json();
-                    })
-                    .then((data) => {
-                        // Preenche os campos com os dados retornados pela API
-                        companyNameInput.value = data.nome || "";
-                        siteInput.value = data.site || "";
-                        countryInput.value = "Brazil"; // Receita WS só retorna empresas brasileiras
-                        
-                        // Atualiza o status e exibe o quadro
-                        statusEmpresa.textContent = data.situacao === "ATIVA" ? "✅ Ativa" : "❌ Inativa";
-                        atividadePrincipal.textContent = data.atividade_principal[0]?.text || "Não informado";
-                        empresaInfoDiv.classList.remove("d-none");
-                    })
-                    .catch((error) => {
-                        alert(error.message || "Erro ao consultar o CNPJ.");
-                    });
-            });
-        });
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const zipcodeInput = document.getElementById("zipcode");
-            const stateInput = document.getElementById("state");
-            const cityInput = document.getElementById("city");
-            const addressInput = document.getElementById("address");
-            const neighborhood = document.getElementById("neighborhood");
-
-            zipcodeInput.addEventListener("blur", function() {
-                let zipcode = zipcodeInput.value.trim().replace(/\D/g, ""); // Remove caracteres não numéricos
-
-                // Validação básica do CEP
-                if (!/^\d{8}$/.test(zipcode)) {
-                    alert("Por favor, insira um CEP válido (8 dígitos numéricos).");
-                    return;
-                }
-
-                // URL da API ViaCEP
-                const viaCepUrl = `https://viacep.com.br/ws/${zipcode}/json/`;
-
-                // Faz a requisição para a API ViaCEP
-                fetch(viaCepUrl)
-                    .then((response) => {
-                        if (!response.ok) {
-                            throw new Error("Erro ao buscar o CEP.");
-                        }
-                        return response.json();
-                    })
-                    .then((data) => {
-                        if (data.erro) {
-                            alert("CEP não encontrado!");
-                            return;
-                        }
-
-                        // Preenche os campos automaticamente com os dados retornados
-                        stateInput.value = data.uf || "";
-                        cityInput.value = data.localidade || "";
-                        addressInput.value = data.logradouro || "";
-                        neighborhood.value = data.bairro || "";
-                    })
-                    .catch((error) => {
-                        alert(error.message || "Erro ao consultar o CEP.");
-                    });
-            });
-        });
-    </script>
+    <script src="../../../../public/assets/js/company.js"></script>
 
     <!-- Rodapé -->
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
@@ -251,15 +158,6 @@ $pais = Helper::getCountryByIPv6($ip);
     <!-- intl-tel-input CSS e JS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
-
-    <script>
-        // Inicializando intl-tel-input
-        const phoneInput = document.querySelector("#phoneNumber");
-        const iti = window.intlTelInput(phoneInput, {
-            initialCountry: "<?= strtolower($pais) ?>", // Define o país inicial como Estados Unidos
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
-        });
-    </script>
 </body>
 
 </html>

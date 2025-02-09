@@ -11,11 +11,11 @@ use App\Modules\Login\LoginController;
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 $loginController = new LoginController();
 
-Security::enforceSessionSecurity();
+Security::initializeSessionSecurity();
 SessionManager::renewSession();
 
-$role = $_SESSION['roleName']; // Permissões do usuário
-$twoFactorEnabled = $_SESSION['two_factor_enabled']; // Adicionei essa variável para verificar se o 2FA está habilitado
+$role = SessionManager::get('roleName'); // Permissões do usuário
+$twoFactorEnabled = SessionManager::get('two_factor_enabled'); // Adicionei essa variável para verificar se o 2FA está habilitado
 
 $qrCodeUrl = $loginController->getQrCode2fa();
 ?>

@@ -31,8 +31,8 @@ class CompanyController
      */
     public function processRegisterCompany()
     {
-        Security::enforceSessionSecurity();
-        var_dump($_POST,$_SESSION);exit;
+        Security::initializeSessionSecurity();
+        var_dump($_POST);exit;
         
         if (!isset($_SESSION['user_id'])) {
             MessageHandler::redirectWithMessage('danger','company_not_logged', 'Você precisa estar logado para criar uma empresa.', '/login');

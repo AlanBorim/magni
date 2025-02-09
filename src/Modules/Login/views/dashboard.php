@@ -9,11 +9,7 @@ use App\Core\SessionManager;
 
 $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-// Verifica se o usuário está autenticado
-if (!SessionManager::get('user_id')) {
-    header("Location: /{$currentLanguage}/");
-    exit;
-}
+Security::initializeSessionSecurity();
 
 // Recupera informações do usuário
 $role = SessionManager::get('roleName', 'guest'); // Se não houver, assume 'guest'

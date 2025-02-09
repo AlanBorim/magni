@@ -215,7 +215,7 @@ class LoginController
             // Teste para verificar se os cookies armazenaram os dados corretamente
             error_log("Sessão Criada: " . json_encode($_COOKIE));
         } catch (RuntimeException $e) {
-            MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão. ' . $e->getMessage(), "/{$currentLanguage}/");
+            MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão. ' . $e->getMessage() . ' Tente novamente.', "/{$currentLanguage}/");
             return;
         }
 
@@ -243,15 +243,15 @@ class LoginController
             return;
         }
 
-        // Security::startTwoFactorValidation($_SESSION['user_id'], $code);
+        Security::startTwoFactorValidation(SessionManager::get('user_id'), $code);
 
-        // if (Security::validateTwoFactorCode($code)) {
-        //     $_SESSION['2fa_pending'] = false;
-        //     header("Location: /{$currentLanguage}/dashboard");
-        // } else {
-        //     MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
-        //     return;
-        // }
+        if (Security::validateTwoFactorCode($code)) {
+            $_SESSION['2fa_pending'] = false;
+            header("Location: /{$currentLanguage}/dashboard");
+        } else {
+            MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
+            return;
+        }
     }
 
     public function processRegister()
@@ -336,9 +336,10 @@ class LoginController
 
     public function processEnable2fa()
     {
+        Security::initializeSessionSecurity();
+        
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
-        #Security::enforceSessionSecurity();
-
+        
         $userInputCode = $_REQUEST['two_factor_code'];
 
         // Carregar a biblioteca RobThree
@@ -362,14 +363,11 @@ class LoginController
 
     public function logout()
     {
-        session_start();
-        $language = $_SESSION['language'] ?? 'pt';
-        // Destrói todos os dados da sessão
-        $_SESSION = [];
-        session_destroy();
+        SessionManager::destroySession();
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
         // Redireciona o usuário para a página de login
-        header("Location: /{$language}/");
+        header("Location: /{$currentLanguage}/");
         exit;
     }
     /**
@@ -439,7 +437,7 @@ class LoginController
         // Gerar chave secreta única para o usuário
         $secret = $tfa->createSecret();
 
-        if (LoginService::updateSecret($_SESSION['user_id'], $secret)) {
+        if (LoginService::updateSecret(SessionManager::get('user_id'), $secret)) {
             $retorno = [];
             $retorno['qrCode'] = $tfa->getQRCodeImageAsDataUri('Magni', $secret);
             $retorno['secret'] = $secret;
