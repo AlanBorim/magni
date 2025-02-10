@@ -14,6 +14,8 @@ Security::initializeSessionSecurity();
 // Recupera informações do usuário
 $role = SessionManager::get('roleName', 'guest'); // Se não houver, assume 'guest'
 $twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
+
+$empresas =[];
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +26,7 @@ $twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
+    <link href="../../../../public/assets/css/company.css" type="text/css" rel="stylesheet">
 </head>
 
 <body>
@@ -96,6 +99,36 @@ $twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
                             </div>
                         </div>
                     </div>
+                    <?php if (empty($empresas)): ?>
+                            <!-- Card sem empresas criadas com efeito de opacidade -->
+                            <div class="col-md-4">
+                                <div class="card" style="opacity: 0.2;">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Nenhuma Empresa Criada</h5>
+                                        <p class="card-text">Crie uma empresa para acessar funcionalidades exclusivas.</p>
+                                        <a href="/<?= $currentLanguage ?>/company/registerCompany" class="btn btn-primary">Criar Empresa</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <!-- Cards das empresas -->
+                            <?php foreach ($empresas as $empresa): ?>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body text-center">
+                                            <div class="image-container">
+                                                <img src="<?= !empty($empresa['image']) ? $empresa['image'] : '/path/to/default-image.jpg' ?>" 
+                                                     alt="<?= $empresa['name'] ?>" 
+                                                     class="rounded-circle img-fluid" 
+                                                     style="width: 100px; height: 100px; object-fit: cover; margin-bottom: 10px;">
+                                            </div>
+                                            <h5 class="card-title"><?= $empresa['name'] ?></h5>
+                                            <a href="<?= $empresa['dashboard_url'] ?>" class="btn btn-primary">Acessar Dashboard</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif;?>
                 </div>
             </div>
         <?php endif; ?>

@@ -1,0 +1,13 @@
+.card {
+    border: 1px solid #ddd;
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.image-container {
+    margin-bottom: 15px;
+}

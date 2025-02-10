@@ -37,6 +37,7 @@ class CompanyController
         $adminUserId = SessionManager::get('user_id');
         $slug = Helper::slugify($_REQUEST['companyName']);
 
+        var_dump($_REQUEST);exit;
         $companyId = $this->companyService->registerCompany($_REQUEST);
 
         MessageHandler::redirectWithMessage('success','company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
@@ -44,8 +45,7 @@ class CompanyController
 
     public function handleCompanyAccess($companySlug)
     {
-        session_start();
-
+ 
         // Verifica se a empresa existe
         $companyService = new CompanyService();
         $company = $companyService->findBySlug($companySlug);
@@ -65,5 +65,10 @@ class CompanyController
         // Se não estiver logado, direciona para a tela de login da empresa
         $loginController = new LoginController();
         $loginController->showLogin($companySlug);
+    }
+
+    public function getCompanies()
+    {
+        
     }
 }
