@@ -22,16 +22,31 @@ class CompanyRepository
      * @param string $slug Slug único da empresa
      * @return int Retorna o ID da empresa criada
      */
-    public function insertCompany(string $name, int $adminId, string $slug): int
+    public function insertCompany(string $companyName, int $cnpjCpf, string $email, string $site, string $phoneNumber, string $country, string $state, string $city, string $zipcode, string $address, string $addressNumber, string $neighborhood, string $description, string $status, string $slug, string $activity, string $activityCode): int
     {
-        $stmt = $this->db->prepare("
-            INSERT INTO companies (name, slug, admin_id) 
-            VALUES (:name, :slug, :admin_id)
+        $stmt = $this->db->prepare("INSERT INTO company (company_name, cnpj_cpf, email, site, phone_number, country, state, city, zipcode, address, address_number, neighborhood, logo, description, status, activity, activity_code, slug, status, activity, activity_code) 
+            VALUES (:company_name, :cnpj_cpf, :email, :site, :phone_number, :country, :state, :city, :zipcode, :address, :address_number, :neighborhood, :logo, :description, :status, :activity, :activity_code, slug, status, activity, activity_code)
         ");
+ 
         $stmt->execute([
-            'name' => $name,
-            'slug' => $slug,
-            'admin_id' => $adminId
+            'company_name' => $companyName, 
+            'cnpj_cpf' => $cnpjCpf, 
+            'email' => $email, 
+            'site' => $site, 
+            'phone_number' => $phoneNumber, 
+            'country' => $country, 
+            'state' => $state, 
+            'city' => $city, 
+            'zipcode' => $zipcode, 
+            'address' => $address, 
+            'address_number' => $addressNumber, 
+            'neighborhood' => $neighborhood, 
+            'logo' => $logo ?? null, 
+            'description' => $description, 
+            'status' => $status, 
+            'activity' => $activity, 
+            'activity_code' => $activityCode, 
+            'slug' => $slug
         ]);
 
         return $this->db->lastInsertId();

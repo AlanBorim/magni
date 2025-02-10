@@ -2,12 +2,13 @@
 
 namespace App\Modules\Company;
 
-use App\Core\Database;
 use App\Core\MessageHandler;
 use App\Core\Security;
+use App\Core\SessionManager;
 use App\Modules\Company\CompanyService;
 use App\Modules\Company\CompanyRepository;
 use App\Modules\Login\LoginController;
+use App\Core\Helpers\Helper;
 
 class CompanyController
 {
@@ -32,21 +33,11 @@ class CompanyController
     public function processRegisterCompany()
     {
         Security::initializeSessionSecurity();
-        var_dump($_POST);exit;
-        
-        if (!isset($_SESSION['user_id'])) {
-            MessageHandler::redirectWithMessage('danger','company_not_logged', 'Você precisa estar logado para criar uma empresa.', '/login');
-        }
 
-        $companyName = trim($_POST['company_name'] ?? '');
-        if (empty($companyName)) {
-            MessageHandler::redirectWithMessage('danger','company_name_error', 'Nome da empresa é obrigatório.', '/company/register');
-        }
+        $adminUserId = SessionManager::get('user_id');
+        $slug = Helper::slugify($_REQUEST['companyName']);
 
-        $adminUserId = $_SESSION['user_id'];
-        $slug = $this->companyService->generateCompanySlug($companyName);
-
-        $companyId = $this->companyService->createCompany($companyName, $adminUserId, $slug);
+        $companyId = $this->companyService->registerCompany($_REQUEST);
 
         MessageHandler::redirectWithMessage('success','company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
     }

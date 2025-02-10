@@ -27,7 +27,7 @@ $pais = Helper::getCountryByIPv6($ip);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Empresa</title>
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
-    
+
 </head>
 
 <body data-country="<?= strtolower($pais) ?>" data-lang="<?= $currentLanguage ?>">
@@ -43,11 +43,14 @@ $pais = Helper::getCountryByIPv6($ip);
                 </div>
                 <!-- CNPJ e botão de consulta -->
                 <div class="col-md-6">
-                    <label for="cnpj" class="form-label">CNPJ</label>
+                    <label for="cnpj" class="form-label">CPF / CNPJ</label>
                     <div class="d-flex">
-                        <input type="text" class="form-control me-2" id="cnpj" name="cnpj" placeholder="Digite o CNPJ">
-                        <button type="button" class="btn btn-info" id="buscarCNPJ"><i class="bi bi-search"></i></button>
+                        <input type="text" class="form-control me-2" id="cnpj" name="cnpj" placeholder="Digite o CPF / CNPJ" onchange="validarDocumento()">
+                        <button type="button" class="btn btn-info" id="buscarCNPJ" onclick="consultarCNPJ()" disabled title="A consulta só é permitida com um CNPJ válido">
+                            <i class="bi bi-search"></i>
+                        </button>
                     </div>
+                    <small id="erroMensagem" class="text-danger" style="display: none;">Por favor, insira um CPF ou CNPJ válido.</small>
                 </div>
             </div>
 
@@ -57,6 +60,9 @@ $pais = Helper::getCountryByIPv6($ip);
                     <div id="empresaInfo" class="d-none">
                         <h5>Status: <span id="statusEmpresa" class="fw-bold"></span></h5>
                         <p><strong>Atividade Principal:</strong> <span id="atividadePrincipal"></span></p>
+                        <input type="hidden" name="status" value="" id="status">
+                        <input type="hidden" name="atividade" value="" id="atividade">
+                        <input type="hidden" name="atividadeCodigo" value="" id="atividadeCodigo">
                     </div>
                 </div>
             </div>
@@ -81,7 +87,7 @@ $pais = Helper::getCountryByIPv6($ip);
                 </div>
                 <div class="col-md-3">
                     <label for="country" class="form-label">Country</label>
-                    <select id="country" class="form-control">
+                    <select id="country" class="form-control" name="country">
                         <!-- Lista de países -->
                         <option value="AU" <?= $pais === "AU" ? "selected" : "" ?>>Australia</option>
                         <option value="BR" <?= $pais === "BR" ? "selected" : "" ?>>Brazil</option>

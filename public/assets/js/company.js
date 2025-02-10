@@ -1,7 +1,8 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Obtendo o valor de data-country
+    // Obtendo o valor de data-country e data-lang
     const pais = document.body.getAttribute('data-country');
-    const currentLanguage = document.body.getAttribute('data-lang'); 
+    const currentLanguage = document.body.getAttribute('data-lang');
+
     const buscarCNPJButton = document.getElementById("buscarCNPJ");
     const cnpjInput = document.getElementById("cnpj");
     const companyNameInput = document.getElementById("companyName");
@@ -14,6 +15,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const statusEmpresa = document.getElementById("statusEmpresa");
     const atividadePrincipal = document.getElementById("atividadePrincipal");
 
+    const hiddenActivity = document.getElementById("atividade");
+    const hiddenActivityCode = document.getElementById("atividadeCodigo");
+    const hiddenStatus = document.getElementById("status");
+
+    // Evento para buscar os dados do CNPJ ao clicar no botão
     buscarCNPJButton.addEventListener("click", function () {
         let cnpj = cnpjInput.value.trim().replace(/\D/g, ""); // Remove caracteres não numéricos
 
@@ -22,6 +28,10 @@ document.addEventListener("DOMContentLoaded", function () {
             alert("Por favor, insira um CNPJ válido (14 números).");
             return;
         }
+
+        // Exibe o spinner e desabilita o botão
+        buscarCNPJButton.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i>'; // Exibe o spinner
+        buscarCNPJButton.disabled = true;
 
         // Monta a URL com a query string
         const apiUrl = '/' + currentLanguage + '/api/getData?url=https://www.receitaws.com.br/v1/cnpj/' + cnpj;
@@ -49,9 +59,22 @@ document.addEventListener("DOMContentLoaded", function () {
                 statusEmpresa.textContent = data.situacao === "ATIVA" ? "✅ Ativa" : "❌ Inativa";
                 atividadePrincipal.textContent = data.atividade_principal[0]?.text || "Não informado";
                 empresaInfoDiv.classList.remove("d-none");
+
+                hiddenStatus.value = data.situacao || "";
+                
+                // Preenche o código e descrição da atividade principal
+                const atividade = data.atividade_principal[0] || {}; // Pega o primeiro objeto de atividade principal
+                hiddenActivity.value = atividade.text || "Não informado"; // Salva a descrição da atividade
+                hiddenActivityCode.value = atividade.code || ""; // Salva o código da atividade principal
+
             })
             .catch((error) => {
                 alert(error.message || "Erro ao consultar o CNPJ.");
+            })
+            .finally(() => {
+                // Remove o spinner e habilita o botão novamente
+                buscarCNPJButton.innerHTML = '<i class="bi bi-search"></i>'; // Remove o spinner
+                buscarCNPJButton.disabled = false;
             });
     });
 
@@ -113,8 +136,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 document.addEventListener("DOMContentLoaded", function () {
+    const criarDesc = document.getElementById("descriptionBtn");
+
+
     // Função para chamar a API do Magni e gerar a descrição da empresa
     async function gerarDescricaoEmpresa() {
+        // Exibe o spinner e desabilita o botão
+        criarDesc.innerHTML = '<i class="bi bi-arrow-repeat spinner-border spinner-border-sm"></i>'; // Exibe o spinner
+        criarDesc.disabled = true;
+
         // Coleta os dados do formulário
         const companyName = document.getElementById("companyName").value;
         const cnpj = document.getElementById("cnpj").value;
@@ -140,7 +170,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     
                     Informações adicionais: ${descriptionAdditional}.
                     
-                    A descrição deve ser clara, profissional e destacar os principais aspectos da empresa com no máximo 500 caracteres.`;
+                    A descrição deve ser clara, profissional, única e destacar os principais aspectos da empresa com no máximo 500 caracteres.`;
+
 
         try {
             // Chamada à API do Magni via fetch para o endpoint fornecido
@@ -158,6 +189,11 @@ document.addEventListener("DOMContentLoaded", function () {
             if (data && data.response) {
                 // Preencher o campo de descrição com a resposta da API
                 document.getElementById("Description").value = data.response.trim();
+
+                // Remove o spinner e habilita o botão novamente
+                criarDesc.innerHTML = 'Gerar Descrição'; // Remove o spinner
+                criarDesc.disabled = false;
+
             } else {
                 alert("Erro ao gerar a descrição na opção desejada.");
             }
@@ -170,3 +206,83 @@ document.addEventListener("DOMContentLoaded", function () {
     // Associar o evento de clique ao botão
     document.getElementById("descriptionBtn").addEventListener("click", gerarDescricaoEmpresa);
 });
+
+function validarCPF(cpf) {
+    cpf = cpf.replace(/[^\d]+/g, '');
+    if (cpf.length !== 11) return false;
+    let soma = 0;
+    let resto;
+    for (let i = 1; i <= 9; i++) {
+        soma += parseInt(cpf.charAt(i - 1)) * (11 - i);
+    }
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.charAt(9))) return false;
+
+    soma = 0;
+    for (let i = 1; i <= 10; i++) {
+        soma += parseInt(cpf.charAt(i - 1)) * (12 - i);
+    }
+    resto = (soma * 10) % 11;
+    if (resto === 10 || resto === 11) resto = 0;
+    if (resto !== parseInt(cpf.charAt(10))) return false;
+
+    return true;
+}
+
+function validarCNPJ(cnpj) {
+    cnpj = cnpj.replace(/[^\d]+/g, '');
+    if (cnpj.length !== 14) return false;
+    let soma = 0;
+    let peso = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+    for (let i = 0; i < 12; i++) {
+        soma += parseInt(cnpj.charAt(i)) * peso[i + 1];
+    }
+    let resto = soma % 11;
+    if (resto < 2) resto = 0;
+    else resto = 11 - resto;
+    if (resto !== parseInt(cnpj.charAt(12))) return false;
+
+    soma = 0;
+    for (let i = 0; i < 13; i++) {
+        soma += parseInt(cnpj.charAt(i)) * peso[i];
+    }
+    resto = soma % 11;
+    if (resto < 2) resto = 0;
+    else resto = 11 - resto;
+    if (resto !== parseInt(cnpj.charAt(13))) return false;
+
+    return true;
+}
+
+function validarDocumento() {
+    const cnpjInput = document.getElementById('cnpj').value.replace(/[^\d]+/g, '');
+    const erroMensagem = document.getElementById('erroMensagem');
+    const botaoBuscar = document.getElementById('buscarCNPJ');
+
+    if (cnpjInput.length === 11) {
+        if (!validarCPF(cnpjInput)) {
+            erroMensagem.style.display = 'block';
+            botaoBuscar.disabled = true;
+            erroMensagem.textContent = 'Por favor, insira um CPF válido.';
+        } else {
+            erroMensagem.style.display = 'none';
+            botaoBuscar.disabled = true;
+        }
+    } else if (cnpjInput.length === 14) {
+        if (!validarCNPJ(cnpjInput)) {
+            erroMensagem.style.display = 'block';
+            botaoBuscar.disabled = true;
+            erroMensagem.textContent = 'Por favor, insira um CNPJ válido.';
+        } else {
+            erroMensagem.style.display = 'none';
+            botaoBuscar.disabled = false;
+            botaoBuscar.title = "Clique para consultar o CNPJ";
+        }
+    } else {
+        erroMensagem.style.display = 'block';
+        botaoBuscar.disabled = true;
+        erroMensagem.textContent = 'Por favor, insira um CPF ou CNPJ válido.';
+    }
+}

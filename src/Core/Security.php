@@ -14,7 +14,7 @@ class Security
    
         // Verifica se o usuário está autenticado
         if (!SessionManager::get('user_id')) {
-            header("Location: /");
+            MessageHandler::redirectWithMessage('danger','not_logged', 'Você precisa estar logado para executar essa ação.', '/');
             exit;
         }
     }

@@ -4,7 +4,7 @@ namespace App\Modules\Company;
 
 use App\Core\Database;
 use App\Core\Helpers\Helper;
-
+use App\Core\SessionManager;
 use PDO;
 
 class CompanyService
@@ -20,22 +20,22 @@ class CompanyService
         $slug = $this->ensureUniqueSlug($slug);
 
         $stmt = $db->prepare("
-            INSERT INTO companies (name, slug, email, phone, website, country, state, city, address, logo, description, created_by)
-            VALUES (:name, :slug, :email, :phone, :website, :country, :state, :city, :address, :logo, :description, :created_by)
+            INSERT INTO company (company_name, slug, email, phone_number, site, country, state, city, address, logo, description, admin_id)
+            VALUES (:company_name, :slug, :email, :phone_number, :site, :country, :state, :city, :address, :logo, :description, :admin_id)
         ");
         $stmt->execute([
-            ':name' => $data['companyName'],
+            ':company_name' => $data['companyName'],
             ':slug' => $slug,
             ':email' => $data['email'],
-            ':phone' => $data['phoneNumber'],
-            ':website' => $data['site'],
+            ':phone_number' => $data['phoneNumber'],
+            ':site' => $data['site'],
             ':country' => $data['country'],
             ':state' => $data['state'],
             ':city' => $data['city'],
             ':address' => $data['address'],
-            ':logo' => $data['logo'],
-            ':description' => $data['description'],
-            ':created_by' => $_SESSION['user_id']
+            ':logo' => $data['logo'] ?? null,
+            ':description' => $data['Description'],
+            ':admin_id' => SessionManager::get('user_id')
         ]);
 
         return $slug; // Retorna o slug da empresa cadastrada
@@ -44,7 +44,7 @@ class CompanyService
     private function ensureUniqueSlug($slug)
     {
         $db = Database::getInstance();
-        $stmt = $db->prepare("SELECT COUNT(*) FROM companies WHERE slug = :slug");
+        $stmt = $db->prepare("SELECT COUNT(*) FROM company WHERE slug = :slug");
         $stmt->execute([':slug' => $slug]);
 
         $count = $stmt->fetchColumn();
@@ -57,7 +57,7 @@ class CompanyService
     public function findBySlug($slug)
     {
         $db = Database::getInstance();
-        $stmt = $db->prepare("SELECT * FROM companies WHERE slug = :slug");
+        $stmt = $db->prepare("SELECT * FROM company WHERE slug = :slug");
         $stmt->execute([':slug' => $slug]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
