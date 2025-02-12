@@ -3,40 +3,24 @@
 namespace App\Modules\Company;
 
 use App\Core\Database;
-use App\Core\Helpers\Helper;
 use App\Core\SessionManager;
+use App\Core\Helpers\Helper;
+use App\Modules\Company\CompanyRepository;
 use PDO;
 
 class CompanyService
 {
-
     
     public function registerCompany($data)
     {
-        $db = Database::getInstance();
-        $slug = Helper::slugify($data['companyName']); // Gera um slug a partir do nome
-
+        
+        $data['slug'] = Helper::slugify($data['companyName']); // Gera um slug a partir do nome
+        $data['user_id'] = SessionManager::get('user_id'); // Pega o ID do usuário logado
         // Verifica se o slug já existe, se sim, adiciona um número ao final
-        $slug = $this->ensureUniqueSlug($slug);
-
-        $stmt = $db->prepare("
-            INSERT INTO company (company_name, slug, email, phone_number, site, country, state, city, address, logo, description, admin_id)
-            VALUES (:company_name, :slug, :email, :phone_number, :site, :country, :state, :city, :address, :logo, :description, :admin_id)
-        ");
-        $stmt->execute([
-            ':company_name' => $data['companyName'],
-            ':slug' => $slug,
-            ':email' => $data['email'],
-            ':phone_number' => $data['phoneNumber'],
-            ':site' => $data['site'],
-            ':country' => $data['country'],
-            ':state' => $data['state'],
-            ':city' => $data['city'],
-            ':address' => $data['address'],
-            ':logo' => $data['logo'] ?? null,
-            ':description' => $data['Description'],
-            ':admin_id' => SessionManager::get('user_id')
-        ]);
+        $slug = $this->ensureUniqueSlug($data['slug']);
+        
+        $repo = new CompanyRepository();
+        $repo->insertCompany($data); // Insere a empresa no banco de dados
 
         return $slug; // Retorna o slug da empresa cadastrada
     }
@@ -60,5 +44,12 @@ class CompanyService
         $stmt = $db->prepare("SELECT * FROM company WHERE slug = :slug");
         $stmt->execute([':slug' => $slug]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getCompaniesByAdmin($adminId)
+    {
+        $repo = new CompanyRepository();
+        return $repo->getCompanies($adminId); 
+
     }
 }

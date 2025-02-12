@@ -1,4 +1,4 @@
-.card {
+/*.card {
     border: 1px solid #ddd;
     margin-bottom: 20px;
     transition: transform 0.3s ease;
@@ -10,4 +10,58 @@
 
 .image-container {
     margin-bottom: 15px;
+}
+*/
+
+/* Grid Container para os cards */
+.row {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Largura mínima de 300px */
+    gap: 20px; /* Espaço entre os cards */
+}
+
+/* Estilo de cada card */
+.card {
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    height: 230px;
+    border: 1px solid;
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+.card-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    flex-grow: 1;
+}
+
+.card img {
+    width: 100px; /* Largura da imagem */
+    height: 100px; /* Altura da imagem */
+    border-radius: 50%; /* Para deixar a imagem redonda */
+    object-fit: cover; /* A imagem vai cobrir a área sem distorcer */
+    margin-bottom: 5px;
+}
+
+.card .btn {
+    margin-top: 10px;
+}
+
+.card-menu{
+    display: flex;
+    justify-content: flex-end;
+    width: 100%;
+    gap: 10px;
 }

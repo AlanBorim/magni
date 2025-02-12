@@ -37,11 +37,18 @@ class CompanyController
         $adminUserId = SessionManager::get('user_id');
         $slug = Helper::slugify($_REQUEST['companyName']);
 
-        var_dump($_REQUEST);exit;
+        
         $companyId = $this->companyService->registerCompany($_REQUEST);
 
         MessageHandler::redirectWithMessage('success','company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
     }
+
+    public function getCompanies()
+    {
+        $adminUserId = SessionManager::get('user_id');
+        $companies = $this->companyService->getCompaniesByAdmin($adminUserId);
+    }
+
 
     public function handleCompanyAccess($companySlug)
     {
@@ -67,8 +74,5 @@ class CompanyController
         $loginController->showLogin($companySlug);
     }
 
-    public function getCompanies()
-    {
-        
-    }
+
 }

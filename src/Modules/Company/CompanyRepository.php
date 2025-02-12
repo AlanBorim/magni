@@ -22,31 +22,31 @@ class CompanyRepository
      * @param string $slug Slug único da empresa
      * @return int Retorna o ID da empresa criada
      */
-    public function insertCompany(string $companyName, int $cnpjCpf, string $email, string $site, string $phoneNumber, string $country, string $state, string $city, string $zipcode, string $address, string $addressNumber, string $neighborhood, string $description, string $status, string $slug, string $activity, string $activityCode): int
+    public function insertCompany(array $data): int
     {
-        $stmt = $this->db->prepare("INSERT INTO company (company_name, cnpj_cpf, email, site, phone_number, country, state, city, zipcode, address, address_number, neighborhood, logo, description, status, activity, activity_code, slug, status, activity, activity_code) 
-            VALUES (:company_name, :cnpj_cpf, :email, :site, :phone_number, :country, :state, :city, :zipcode, :address, :address_number, :neighborhood, :logo, :description, :status, :activity, :activity_code, slug, status, activity, activity_code)
+        $stmt = $this->db->prepare("INSERT INTO company (company_name, cnpj_cpf, email, site, phone_number, country, state, city, zipcode, address, address_number, neighborhood, logo, description, status, activity, activity_code, slug, admin_id) 
+            VALUES (:company_name, :cnpj_cpf, :email, :site, :phone_number, :country, :state, :city, :zipcode, :address, :address_number, :neighborhood, :logo, :description, :status, :activity, :activity_code, :slug, :admin_id)
         ");
- 
         $stmt->execute([
-            'company_name' => $companyName, 
-            'cnpj_cpf' => $cnpjCpf, 
-            'email' => $email, 
-            'site' => $site, 
-            'phone_number' => $phoneNumber, 
-            'country' => $country, 
-            'state' => $state, 
-            'city' => $city, 
-            'zipcode' => $zipcode, 
-            'address' => $address, 
-            'address_number' => $addressNumber, 
-            'neighborhood' => $neighborhood, 
-            'logo' => $logo ?? null, 
-            'description' => $description, 
-            'status' => $status, 
-            'activity' => $activity, 
-            'activity_code' => $activityCode, 
-            'slug' => $slug
+            ':company_name' => $data['companyName'],
+            ':cnpj_cpf' => $data['cnpj'],
+            ':email' => $data['email'],
+            ':site' => $data['site'],
+            ':phone_number' => $data['phoneNumber'],
+            ':country' => $data['country'],
+            ':state' => $data['state'],
+            ':city' => $data['city'],
+            ':zipcode' => $data['zipcode'],
+            ':address' => $data['address'],
+            ':address_number' => $data['addressNumber'],
+            ':neighborhood' => $data['neighborhood'],
+            ':logo' => $data['logo'] ?? null,
+            ':description' => $data['Description'],
+            ':status' => $data['status'],
+            ':activity' => $data['atividade'],
+            ':activity_code' => $data['atividadeCodigo'],
+            ':slug' => $data['slug'],
+            ':admin_id' => $data['user_id']
         ]);
 
         return $this->db->lastInsertId();
@@ -100,5 +100,12 @@ class CompanyRepository
             VALUES (:company_id, NULL, '#ffffff', '[]')
         ");
         $stmt->execute(['company_id' => $companyId]);
+    }
+
+    public function getCompanies(int $userId): array
+    {
+        $stmt = $this->db->prepare("SELECT * FROM company WHERE admin_id = :admin_id");
+        $stmt->execute(['admin_id' => $userId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
