@@ -35,10 +35,10 @@ class Router
      */
     public function handleRequest()
     {
-       
-
-        // Verifica se o idioma está na URL
+        // Obtém a URI sem query string
         $uri = strtok($_SERVER['REQUEST_URI'], '?');
+
+        // Verifica se a URL contém o idioma no início
         if (!preg_match('/^\/(pt|en)\//', $uri)) {
             $language = LanguageDetector::detectLanguage()['language'] ?? 'pt';
             header("Location: /$language$uri");
@@ -48,15 +48,23 @@ class Router
         $method = $_SERVER['REQUEST_METHOD'];
         $uri = rtrim($uri, '/'); // Remove barra final
 
-        $action = $this->routes[$method][$uri] ?? null;
+        // Percorre as rotas registradas para encontrar correspondência
+        foreach ($this->routes[$method] as $routePattern => $action) {
+            // Converte padrões de rota dinâmicos para regex
+            $pattern = preg_replace('/\{([^\/]+)\}/', '([^/]+)', $routePattern);
+            $pattern = "#^" . $pattern . "$#";
 
-        if ($action) {
-            [$class, $method] = $action;
-            (new $class())->$method();
-        } else {
-            http_response_code(404);
-            include __DIR__ . '/../inc/error404.php';
+            if (preg_match($pattern, $uri, $matches)) {
+                array_shift($matches); // Remove o primeiro item (URI completa)
+                [$class, $method] = $action;
+                (new $class())->$method(...$matches); // Passa parâmetros dinâmicos
+                return;
+            }
         }
+
+        // Caso a rota não seja encontrada
+        http_response_code(404);
+        include __DIR__ . '/../inc/error404.php';
     }
 
 

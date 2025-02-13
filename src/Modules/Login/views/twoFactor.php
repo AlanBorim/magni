@@ -38,14 +38,14 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
             <div class="col-md-6 d-flex flex-column">
                 <!-- Barra de seleção de idioma -->
                 <div class="w-100 py-2 text-end">
-                    
+
                 </div>
 
                 <div class="d-flex justify-content-center align-items-center flex-grow-1">
                     <div class="w-75">
                         <h3 class="text-center mb-4"><?= _("Twofa title") ?></h3>
-                        <?php 
-                        
+                        <?php
+
                         ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
                         <form method="POST" action="/<?= $currentLanguage; ?>/two-factor-check">
                             <div class="mb-3">

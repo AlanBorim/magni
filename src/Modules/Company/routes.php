@@ -5,7 +5,7 @@ use App\Modules\Company\UserController;
 
 
 // Rota para acessar a empresa pelo slug
-$router->get('/{companySlug}', [CompanyController::class, 'handleCompanyAccess']);
+$router->get('/{companySlug}/dashboard', [CompanyController::class, 'handleCompanyAccess']);
 
 $router->get('/company/registerCompany', [CompanyController::class, 'showRegisterCompany']); // Cadastro de empresa
 

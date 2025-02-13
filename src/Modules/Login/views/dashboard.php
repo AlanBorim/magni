@@ -126,8 +126,8 @@ $empresas = $empresaData->getCompaniesByAdmin(SessionManager::get('user_id')) ??
                                         </div>
                                         <h5 class="card-title"><?= $empresa['company_name'] ?></h5>
                                         <div class="card-menu">
-                                            <a href="<?= $empresa['slug'] ?>" class="btn btn-primary" title="Acessar Dashboard"><i class="bi bi-building-fill"></i></a>
-                                            <a href="<?= $empresa['slug'] ?>" class="btn btn-primary" title="Acessar Configurações"><i class="bi bi-gear"></i></a>
+                                            <a href="<?= $empresa['slug'] ?>/dashboard" class="btn btn-primary" title="Acessar Dashboard"><i class="bi bi-building-fill"></i></a>
+                                            <a href="<?= $empresa['slug'] ?>/dashboard" class="btn btn-primary" title="Acessar Configurações"><i class="bi bi-gear"></i></a>
                                         </div>
                                     </div>
                                 </div>

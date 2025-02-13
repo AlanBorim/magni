@@ -5,10 +5,12 @@ namespace App\Modules\Company;
 use App\Core\MessageHandler;
 use App\Core\Security;
 use App\Core\SessionManager;
+use App\Core\Helpers\Helper;
+
 use App\Modules\Company\CompanyService;
 use App\Modules\Company\CompanyRepository;
 use App\Modules\Login\LoginController;
-use App\Core\Helpers\Helper;
+use App\Modules\Dashboard\DashboardController;
 
 class CompanyController
 {
@@ -37,10 +39,10 @@ class CompanyController
         $adminUserId = SessionManager::get('user_id');
         $slug = Helper::slugify($_REQUEST['companyName']);
 
-        
+
         $companyId = $this->companyService->registerCompany($_REQUEST);
 
-        MessageHandler::redirectWithMessage('success','company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
+        MessageHandler::redirectWithMessage('success', 'company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
     }
 
     public function getCompanies()
@@ -52,10 +54,12 @@ class CompanyController
 
     public function handleCompanyAccess($companySlug)
     {
- 
+        // Obtém o idioma da URL
+        $uriParts = explode('/', trim($_SERVER['REQUEST_URI'], '/'));
+        $language = $uriParts[0] ?? 'pt'; // Padrão: 'pt' se não encontrado
+
         // Verifica se a empresa existe
-        $companyService = new CompanyService();
-        $company = $companyService->findBySlug($companySlug);
+        $company = $this->companyService->findBySlug($companySlug);
 
         if (!$company) {
             http_response_code(404);
@@ -63,16 +67,15 @@ class CompanyController
             exit;
         }
 
-        // Se o usuário estiver logado, redireciona para a dashboard da empresa
-        if (!empty($_SESSION['user_id'])) {
-            header("Location: /{$companySlug}/dashboard");
-            exit;
+        // Se o usuário estiver logado, carrega a dashboard
+        if (!empty(SessionManager::get('user_id'))) {
+            $dashboardController = new DashboardController();
+            $dashboardController->showDashboard($language, $companySlug);
+            return;
         }
 
         // Se não estiver logado, direciona para a tela de login da empresa
         $loginController = new LoginController();
-        $loginController->showLogin($companySlug);
+        $loginController->showLogin($language, $companySlug);
     }
-
-
 }

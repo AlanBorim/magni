@@ -17,7 +17,10 @@ SessionManager::renewSession();
 $role = SessionManager::get('roleName'); // Permissões do usuário
 $twoFactorEnabled = SessionManager::get('two_factor_enabled'); // Adicionei essa variável para verificar se o 2FA está habilitado
 
-$qrCodeUrl = $loginController->getQrCode2fa();
+if(json_decode($_COOKIE["MAGNI_SESSION"], true)['data']['two_factor_enabled'] != 1) {
+    $qrCodeUrl = $loginController->getQrCode2fa();
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="<?= $currentLanguage ?>">

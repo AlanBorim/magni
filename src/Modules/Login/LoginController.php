@@ -31,7 +31,7 @@ class LoginController
             MessageHandler::redirectWithMessage('danger', 'not_connected', 'Usuario não conectado.', '/');
             return;
         }
-        
+
         include __DIR__ . '/views/dashboard.php';
     }
 
@@ -232,9 +232,8 @@ class LoginController
 
     public function process2fa()
     {
-        $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-        #Security::enforceSessionSecurity();
+        $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
         $code = $_REQUEST['two_factor_code'] ?? '';
 
@@ -244,9 +243,9 @@ class LoginController
         }
 
         Security::startTwoFactorValidation(SessionManager::get('user_id'), $code);
-
+        
         if (Security::validateTwoFactorCode($code)) {
-            $_SESSION['2fa_pending'] = false;
+            SessionManager::set('2fa_pending', false);
             header("Location: /{$currentLanguage}/dashboard");
         } else {
             MessageHandler::redirectWithMessage('danger', 'invalid_2fa', 'Código 2FA inválido.', "/{$currentLanguage}/two-factor");
@@ -337,9 +336,9 @@ class LoginController
     public function processEnable2fa()
     {
         Security::initializeSessionSecurity();
-        
+
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
-        
+
         $userInputCode = $_REQUEST['two_factor_code'];
 
         // Carregar a biblioteca RobThree
@@ -349,9 +348,9 @@ class LoginController
         // Validar o código 2FA fornecido
         if ($tfa->verifyCode($_REQUEST['secret'], $userInputCode)) {
             $loginService = new LoginService();
-            if ($loginService->updateEnable2fa($_SESSION['user_id'])) {
+            if ($loginService->updateEnable2fa(SessionManager::get('user_id'))) {
 
-                $_SESSION['two_factor_enabled'] = 1;
+                SessionManager::set('two_factor_enabled', 1);
                 MessageHandler::redirectWithMessage('success', 'secret_ok', '2FA habilitado com sucesso.', "/{$currentLanguage}/enable2fa");
                 return;
             }
@@ -430,8 +429,6 @@ class LoginController
 
     public function getQrCode2fa()
     {
-
-        #Security::enforceSessionSecurity();
 
         $tfa = new TwoFactorAuth();
         // Gerar chave secreta única para o usuário

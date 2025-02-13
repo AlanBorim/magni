@@ -54,9 +54,8 @@ class Security
         $tfa = new TwoFactorAuth();
         $user = new LoginService();
         $userData = $user->findById(SessionManager::get('user_id'));
-
         $twoFactorSecret = $userData['two_factor_secret'];
-
+        
         if ($tfa->verifyCode($twoFactorSecret, $userInputCode)) {
             SessionManager::set('two_factor_validated',true);
             SessionManager::remove('two_factor_secret');

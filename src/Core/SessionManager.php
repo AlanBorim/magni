@@ -24,7 +24,7 @@ class SessionManager
         ];
 
         $sessionData['data'][$key] = $value;
-        $sessionData['session_expire'] = time() + self::COOKIE_LIFETIME; // Atualiza tempo de expiração
+        
         self::setSessionCookie($sessionData);
     }
 
