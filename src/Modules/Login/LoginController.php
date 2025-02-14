@@ -185,22 +185,22 @@ class LoginController
         $password = trim($_POST['password'] ?? '');
         $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
-        // Valida o usuário e senha
-        $loginService = new LoginService();
-        $user = $loginService->validateUser($email, $password);
 
-        if (!$user) {
-            MessageHandler::redirectWithMessage('danger', 'access_error', 'Usuário ou senha inválidos.', "/{$currentLanguage}/");
-            return;
-        }
-
-        // Verifica se a conta está ativada antes de criar a sessão
-        if ($user['activated'] == '0') {
-            MessageHandler::redirectWithMessage('danger', 'not_activated', 'Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.', "/{$currentLanguage}/");
-            return;
-        }
 
         try {
+            // Valida o usuário e senha
+            $loginService = new LoginService();
+            $user = $loginService->validateUser($email, $password);
+
+            if (!$user) {
+                throw new RuntimeException("Usuário ou senha inválidos.");
+            }
+
+            // Verifica se a conta está ativada antes de criar a sessão
+            if ($user['activated'] == '0') {
+                throw new RuntimeException("Conta não ativada. Verifique seu e-mail ou reenvie o link de ativação.");
+            }
+            
             // Define os dados da sessão usando SessionManager
             SessionManager::initializeUserSession($user);
 
@@ -212,8 +212,6 @@ class LoginController
             // Atualiza o último login do usuário
             LoginService::updateLastLogin($user['id']);
 
-            // Teste para verificar se os cookies armazenaram os dados corretamente
-            error_log("Sessão Criada: " . json_encode($_COOKIE));
         } catch (RuntimeException $e) {
             MessageHandler::redirectWithMessage('danger', 'session_error', 'Erro ao iniciar a sessão. ' . $e->getMessage() . ' Tente novamente.', "/{$currentLanguage}/");
             return;
@@ -226,7 +224,7 @@ class LoginController
             header("Location: /{$currentLanguage}/dashboard");
         }
 
-        exit; // Sempre interrompe após redirecionamento
+        exit; 
     }
 
 
@@ -243,7 +241,7 @@ class LoginController
         }
 
         Security::startTwoFactorValidation(SessionManager::get('user_id'), $code);
-        
+
         if (Security::validateTwoFactorCode($code)) {
             SessionManager::set('2fa_pending', false);
             header("Location: /{$currentLanguage}/dashboard");

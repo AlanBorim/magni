@@ -40,9 +40,9 @@ class CompanyController
         $slug = Helper::slugify($_REQUEST['companyName']);
 
 
-        $companyId = $this->companyService->registerCompany($_REQUEST);
+        $companyId = $this->companyService->registerCompany($_REQUEST,$_FILES);
 
-        MessageHandler::redirectWithMessage('success', 'company_success', 'Empresa cadastrada com sucesso!', "/company/$slug/dashboard");
+        MessageHandler::redirectWithMessage('success', 'company_success', 'Empresa cadastrada com sucesso!', "/$slug/dashboard");
     }
 
     public function getCompanies()

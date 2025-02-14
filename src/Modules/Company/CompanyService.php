@@ -11,7 +11,7 @@ use PDO;
 class CompanyService
 {
     
-    public function registerCompany($data)
+    public function registerCompany($data,$file)
     {
         
         $data['slug'] = Helper::slugify($data['companyName']); // Gera um slug a partir do nome
@@ -20,7 +20,7 @@ class CompanyService
         $slug = $this->ensureUniqueSlug($data['slug']);
         
         $repo = new CompanyRepository();
-        $repo->insertCompany($data); // Insere a empresa no banco de dados
+        $repo->insertCompany($data,$file); // Insere a empresa no banco de dados
 
         return $slug; // Retorna o slug da empresa cadastrada
     }
