@@ -29,6 +29,11 @@ class CompanyController
         include __DIR__ . '/Views/register.php';
     }
 
+    public function showCompanySettings()
+    {
+        include __DIR__ . '/Views/settings.php';
+    }
+
     /**
      * Processa o cadastro da empresa e define o usuário logado como admin
      */

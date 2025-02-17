@@ -26,7 +26,7 @@ class CompanyRepository
     public function insertCompany(array $data, array $files): int
     {
         // Diretório onde as logos serão armazenadas
-        $uploadDir = __DIR__ . '/../../public/uploads/logos/';
+        $uploadDir = __DIR__ . '/../../../public/uploads/logos/';
 
         // Verifica se o diretório existe, senão cria
         if (!is_dir($uploadDir)) {
@@ -82,7 +82,7 @@ class CompanyRepository
             ':address_number' => $data['addressNumber'],
             ':neighborhood' => $data['neighborhood'],
             ':logo' => $logoPath, // Salva o caminho correto da logo
-            ':description' => $data['description'],
+            ':description' => $data['Description'],
             ':status' => $data['status'],
             ':activity' => $data['atividade'],
             ':activity_code' => $data['atividadeCodigo'],

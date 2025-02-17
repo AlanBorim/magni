@@ -18,6 +18,8 @@ $twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
 
 $empresaData = new CompanyService();
 $empresas = $empresaData->getCompaniesByAdmin(SessionManager::get('user_id')) ?? [];
+
+SessionManager::renewSession();
 ?>
 
 <!DOCTYPE html>
@@ -127,7 +129,7 @@ $empresas = $empresaData->getCompaniesByAdmin(SessionManager::get('user_id')) ??
                                         <h5 class="card-title"><?= $empresa['company_name'] ?></h5>
                                         <div class="card-menu">
                                             <a href="<?= $empresa['slug'] ?>/dashboard" class="btn btn-primary" title="Acessar Dashboard"><i class="bi bi-building-fill"></i></a>
-                                            <a href="<?= $empresa['slug'] ?>/dashboard" class="btn btn-primary" title="Acessar Configurações"><i class="bi bi-gear"></i></a>
+                                            <a href="<?= $empresa['slug'] ?>/settings?s=<?= base64_encode($empresa['slug']) ?>" class="btn btn-primary" title="Acessar Configurações"><i class="bi bi-gear"></i></a>
                                         </div>
                                     </div>
                                 </div>

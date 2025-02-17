@@ -16,7 +16,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <ul class="navbar-nav">
+        <ul class="collapse navbar-collapse navbar-nav" id="navbarNav">
             <li class="nav-item">
                 <a class="nav-link" href="/<?= $currentLanguage ?>/dashboard">
                     <i class="bi bi-house-door" style="font-size: 20px; margin-right: 10px;"></i>Dashboard
@@ -41,25 +41,36 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
 
     </div>
     <!-- Barra de seleção de idioma -->
-    <div class="w-25 py-2 border-bottom text-end small">
+    <div class="py-2 border-bottom small d-flex justify-content-end align-items-center w-100 px-3">
         <?php
         // Detecta o idioma atual e a URI
         $currentUri = $_SERVER['REQUEST_URI']; // URI completa
         $currentUriWithoutLang = preg_replace('/^\/(pt|en)\//', '/', $currentUri); // Remove o idioma atual da URI
 
         // Links para os idiomas
-        $ptUrl = '/pt' . $currentUriWithoutLang; // Adiciona o prefixo "pt"
-        $enUrl = '/en' . $currentUriWithoutLang; // Adiciona o prefixo "en"
+        $ptUrl = '/pt' . $currentUriWithoutLang;
+        $enUrl = '/en' . $currentUriWithoutLang;
         ?>
-        <a href="<?= $ptUrl ?>">
-            <img src="/public/assets/images/flags/pt.png" alt="Português" title="Português" width="20" height="20">
-        </a>
-        <a href="<?= $enUrl ?>" class="me-2">
-            <img src="/public/assets/images/flags/en.png" alt="English" title="English" width="20" height="20">
-        </a>
-        Sua sessão expirará em: <span id="session-timer"></span>
+
+        <div class="d-flex align-items-center gap-3">
+            <!-- Seletor de idioma -->
+            <div class="d-flex align-items-center">
+                <a href="<?= $ptUrl ?>" class="me-2">
+                    <img src="/public/assets/images/flags/pt.png" alt="Português" title="Português" width="20" height="20">
+                </a>
+                <a href="<?= $enUrl ?>">
+                    <img src="/public/assets/images/flags/en.png" alt="English" title="English" width="20" height="20">
+                </a>
+            </div>
+
+            <!-- Timer da sessão -->
+            <div>
+                <span>Sua sessão expirará em: <strong id="session-timer"></strong></span>
+            </div>
+        </div>
     </div>
-    
+
+
 
 
 </nav>

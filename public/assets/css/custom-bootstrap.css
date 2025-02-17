@@ -63,11 +63,13 @@ body {
 .footer {
     background-color: #fdad00;
     padding: 10px 0;
+    z-index: 1;
 }
 
 .navbar {
     background-color: var(--navbar-light-bg);
     color: var(--navbar-light-color);
+    z-index: 1;
 }
 
 .navbar[data-bs-theme="dark"] {

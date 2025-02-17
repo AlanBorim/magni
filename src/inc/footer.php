@@ -10,14 +10,12 @@
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const htmlElement = document.documentElement;
-        if (document.getElementById('darkModeSwitch')) {
-            const darkModeSwitch = document.getElementById('darkModeSwitch');
-        }
-        const navbar = document.querySelector('.navbar');
+        const navbar = document.querySelector(".navbar");
+        const sidebar = document.getElementById("sidebar"); // Obtém o sidebar
 
         const ThemeManager = (() => {
-            const THEME_KEY = 'preferencesTheme';
-            const DEFAULT_THEME = 'light';
+            const THEME_KEY = "preferencesTheme";
+            const DEFAULT_THEME = "light";
 
             const getSavedTheme = () => {
                 return localStorage.getItem(THEME_KEY) || DEFAULT_THEME;
@@ -28,14 +26,19 @@
             };
 
             const applyTheme = (theme) => {
-                htmlElement.setAttribute('data-bs-theme', theme);
+                htmlElement.setAttribute("data-bs-theme", theme);
+
                 if (navbar) {
-                    navbar.setAttribute('data-bs-theme', theme);
+                    navbar.setAttribute("data-bs-theme", theme);
+                }
+
+                if (sidebar) {
+                    sidebar.setAttribute("data-theme", theme);
                 }
             };
 
             const toggleTheme = (isDarkMode) => {
-                const newTheme = isDarkMode ? 'dark' : 'light';
+                const newTheme = isDarkMode ? "dark" : "light";
                 applyTheme(newTheme);
                 saveTheme(newTheme);
             };
@@ -43,7 +46,7 @@
             return {
                 getSavedTheme,
                 applyTheme,
-                toggleTheme
+                toggleTheme,
             };
         })();
 
@@ -55,26 +58,24 @@
             ThemeManager.applyTheme(savedTheme);
 
             // Seleciona o elemento do switch
-            const darkModeSwitch = document.getElementById('darkModeSwitch');
+            const darkModeSwitch = document.getElementById("darkModeSwitch");
 
             // Verifica se o elemento existe antes de acessar a propriedade
             if (darkModeSwitch) {
-                darkModeSwitch.checked = savedTheme === 'dark';
-                const setupEventListeners = () => {
-                    darkModeSwitch.addEventListener('change', () => {
-                        ThemeManager.toggleTheme(darkModeSwitch.checked);
-                    });
-                };
-                setupEventListeners();
+                darkModeSwitch.checked = savedTheme === "dark";
+
+                darkModeSwitch.addEventListener("change", () => {
+                    ThemeManager.toggleTheme(darkModeSwitch.checked);
+                });
             }
         };
-
 
         initializeTheme();
     });
 
+
     // Lista de páginas onde o timer NÃO deve rodar
-    const publicPages = ['pt','en','login', 'register', 'forgot-password', 'verify-2fa','two-factor', 'reset-password'];
+    const publicPages = ['pt', 'en', 'login', 'register', 'forgot-password', 'verify-2fa', 'two-factor', 'reset-password'];
 
     // Obtém a URL atual e extrai a última parte (exemplo: 'dashboard')
     const currentPage = window.location.pathname.split('/').filter(Boolean).pop();
