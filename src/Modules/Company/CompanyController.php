@@ -50,12 +50,18 @@ class CompanyController
         MessageHandler::redirectWithMessage('success', 'company_success', 'Empresa cadastrada com sucesso!', "/$slug/dashboard");
     }
 
+    public function processUpdateCompany()
+    {
+        var_dump($_REQUEST);
+    }
+
+
+
     public function getCompanies()
     {
         $adminUserId = SessionManager::get('user_id');
         $companies = $this->companyService->getCompaniesByAdmin($adminUserId);
     }
-
 
     public function handleCompanyAccess($companySlug)
     {

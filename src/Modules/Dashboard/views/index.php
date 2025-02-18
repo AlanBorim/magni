@@ -1,123 +1,75 @@
 <?php
 
-// Definições de cores e fontes (valores padrão)
-$bg_color = '#f8f9fa';
-$font_color = '#212529';
-$font_family = 'Arial, sans-serif';
+require_once __DIR__ . '/../../../../vendor/autoload.php';
 
-$modulos = [
-    ['nome' => 'Dashboard', 'link' => '/dashboard'],
-    ['nome' => 'Vendas', 'link' => '/vendas'],
-    ['nome' => 'Produtos', 'link' => '/produtos'],
-    ['nome' => 'Clientes', 'link' => '/clientes'],
-    ['nome' => 'Relatórios', 'link' => '/relatorios'],
-];
+use App\Core\ViewHelper;
+use App\Core\LanguageDetector;
+use App\Modules\Company\CompanyService;
+
+// Obtém o idioma e o slug da empresa a partir da URL
+$currentLanguage = LanguageDetector::detectLanguage()['language'];
+$slug = getCompanySlugFromUrl();
+
+if (!$slug) {
+    die('Erro: Empresa não encontrada.');
+}
+
+// Verifica se a empresa existe no banco de dados
+$companyService = new CompanyService();
+$company = $companyService->findBySlug($slug);
+
+if (!$company) {
+    die('Erro: Empresa não encontrada no sistema.');
+}
+
+// Se a empresa existir, exibe a tela de login personalizada para a empresa
 ?>
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="<?= $currentLanguage ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: <?php echo $bg_color; ?>;
-            color: <?php echo $font_color; ?>;
-            font-family: <?php echo $font_family; ?>;
-        }
-        .sidebar {
-            width: 250px;
-            background-color: #343a40;
-            color: white;
-            height: 100vh;
-            position: fixed;
-            padding-top: 20px;
-        }
-        .sidebar a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 10px 20px;
-        }
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-        .content {
-            margin-left: 260px;
-            padding: 20px;
-        }
-    </style>
+    <title>Login - <?= htmlspecialchars($company['company_name']) ?></title>
+    <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/headers.php'); ?>
 </head>
 <body>
-    <div class="d-flex">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="text-center mb-4">
-                <img src="/public/assets/images/150.png" alt="Logo" class="img-fluid" style="max-width: 150px;">
+
+    <div class="container mt-5">
+        <h3>Bem-vindo à <?= htmlspecialchars($company['company_name']) ?></h3>
+        <p>Faça login para acessar sua empresa.</p>
+
+        <form action="/<?= $currentLanguage ?>/company/login" method="post">
+            <input type="hidden" name="slug" value="<?= htmlspecialchars($slug) ?>">
+            
+            <div class="mb-3">
+                <label for="email" class="form-label">E-mail</label>
+                <input type="email" class="form-control" id="email" name="email" required>
             </div>
-            <?php foreach ($modulos as $modulo): ?>
-                <a href="<?php echo $modulo['link']; ?>"><?php echo $modulo['nome']; ?></a>
-            <?php endforeach; ?>
-            <hr>
-            <a href="#" data-bs-toggle="modal" data-bs-target="#configModal">Configurações</a>
-        </div>
-        
-        <!-- Conteúdo principal -->
-        <div class="content">
-            <h2>Dashboard - Empresa Nome</h2>
-            <div class="row">
-                <!-- Espaço para os cards de BI -->
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Projeção 1</h5>
-                            <p class="card-text">Dados e gráficos aqui...</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Projeção 2</h5>
-                            <p class="card-text">Dados e gráficos aqui...</p>
-                        </div>
-                    </div>
-                </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Senha</label>
+                <input type="password" class="form-control" id="password" name="password" required>
             </div>
-        </div>
+
+            <button type="submit" class="btn btn-primary w-100">Entrar</button>
+        </form>
     </div>
 
-    <!-- Modal de Configuração -->
-    <div class="modal fade" id="configModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Configurações</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form action="salvar_configuracoes.php" method="post">
-                        <label for="bg_color">Cor de fundo:</label>
-                        <input type="color" id="bg_color" name="bg_color" value="<?php echo $bg_color; ?>" class="form-control">
-                        
-                        <label for="font_color">Cor da fonte:</label>
-                        <input type="color" id="font_color" name="font_color" value="<?php echo $font_color; ?>" class="form-control">
-                        
-                        <label for="font_family">Fonte:</label>
-                        <select id="font_family" name="font_family" class="form-control">
-                            <option value="Arial, sans-serif" <?php echo ($font_family == 'Arial, sans-serif') ? 'selected' : ''; ?>>Arial</option>
-                            <option value="Verdana, sans-serif" <?php echo ($font_family == 'Verdana, sans-serif') ? 'selected' : ''; ?>>Verdana</option>
-                            <option value="Tahoma, sans-serif" <?php echo ($font_family == 'Tahoma, sans-serif') ? 'selected' : ''; ?>>Tahoma</option>
-                        </select>
-                        
-                        <button type="submit" class="btn btn-primary mt-3">Salvar</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/footer.php'); ?>
 </body>
 </html>
+
+<?php
+/**
+ * Captura o slug da empresa a partir da URL.
+ */
+function getCompanySlugFromUrl(): ?string
+{
+    $currentUrl = $_SERVER['REQUEST_URI'];
+    $cleanedUrl = strtok($currentUrl, '?'); // Remove query strings
+    $urlParts = explode('/', trim($cleanedUrl, '/'));
+    
+    // Verifica se o formato é /{idioma}/{slug}/
+    return isset($urlParts[0]) && isset($urlParts[1]) ? $urlParts[1] : null;
+}
+?>

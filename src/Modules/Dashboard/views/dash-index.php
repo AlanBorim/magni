@@ -12,9 +12,12 @@ $modulos = [
     ['nome' => 'Clientes', 'link' => '/clientes'],
     ['nome' => 'Relatórios', 'link' => '/relatorios'],
 ];
+
+var_dump($_SERVER['REQUEST_URI']);
 ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,6 +29,7 @@ $modulos = [
             color: <?php echo $font_color; ?>;
             font-family: <?php echo $font_family; ?>;
         }
+
         .sidebar {
             width: 250px;
             background-color: #343a40;
@@ -34,21 +38,25 @@ $modulos = [
             position: fixed;
             padding-top: 20px;
         }
+
         .sidebar a {
             color: white;
             text-decoration: none;
             display: block;
             padding: 10px 20px;
         }
+
         .sidebar a:hover {
             background-color: #495057;
         }
+
         .content {
             margin-left: 260px;
             padding: 20px;
         }
     </style>
 </head>
+
 <body>
     <div class="d-flex">
         <!-- Sidebar -->
@@ -62,8 +70,9 @@ $modulos = [
             <hr>
             <a href="#" data-bs-toggle="modal" data-bs-target="#configModal">Configurações</a>
         </div>
-        
+
         <!-- Conteúdo principal -->
+        <?php var_dump($_SERVER['REQUEST_URI']); ?>
         <div class="content">
             <h2>Dashboard - <?php echo $empresa['nome']; ?></h2>
             <div class="row">
@@ -100,17 +109,17 @@ $modulos = [
                     <form action="salvar_configuracoes.php" method="post">
                         <label for="bg_color">Cor de fundo:</label>
                         <input type="color" id="bg_color" name="bg_color" value="<?php echo $bg_color; ?>" class="form-control">
-                        
+
                         <label for="font_color">Cor da fonte:</label>
                         <input type="color" id="font_color" name="font_color" value="<?php echo $font_color; ?>" class="form-control">
-                        
+
                         <label for="font_family">Fonte:</label>
                         <select id="font_family" name="font_family" class="form-control">
                             <option value="Arial, sans-serif" <?php echo ($font_family == 'Arial, sans-serif') ? 'selected' : ''; ?>>Arial</option>
                             <option value="Verdana, sans-serif" <?php echo ($font_family == 'Verdana, sans-serif') ? 'selected' : ''; ?>>Verdana</option>
                             <option value="Tahoma, sans-serif" <?php echo ($font_family == 'Tahoma, sans-serif') ? 'selected' : ''; ?>>Tahoma</option>
                         </select>
-                        
+
                         <button type="submit" class="btn btn-primary mt-3">Salvar</button>
                     </form>
                 </div>
@@ -120,4 +129,5 @@ $modulos = [
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -13,7 +13,7 @@ $currentLanguage = LanguageDetector::detectLanguage()['language'];
 Security::initializeSessionSecurity();
 
 // Recupera informações do usuário
-$role = SessionManager::get('roleName', 'guest'); // Se não houver, assume 'guest'
+$role = SessionManager::get('role', 'guest'); // Se não houver, assume 'guest'
 $twoFactorEnabled = SessionManager::get('two_factor_enabled', false);
 
 $empresaData = new CompanyService();
@@ -37,28 +37,34 @@ SessionManager::renewSession();
 
     <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/menu.php'); ?>
 
-    <div class="container mt-5">
-        <h3><?= _('Dash welcome') ?></h3>
-        <p><?= _('Dash permission') ?> <strong><?= htmlspecialchars($role) ?></strong></p>
-
-        <!-- Notificação de 2FA -->
-        <?php if (!$twoFactorEnabled): ?>
-            <div class="alert alert-warning">
-                <strong><?= _('Dash Attention') ?></strong> <?= _('Dash 2fa') ?>
-                <a href="/<?= $currentLanguage ?>/enable2fa" class="btn btn-warning btn-sm"><?= _('Dash 2fa button') ?></a>
+    <div class="container mt-4">
+        <div class="d-flex flex-row align-items-center">
+            <!-- Mensagem de boas-vindas -->
+            <div class="col-8">
+                <h3><?= _('Dash welcome') ?></h3>
+                <p><?= _('Dash permission') ?> <strong><?= htmlspecialchars($role) ?></strong></p>
             </div>
-        <?php endif; ?>
+            <!-- Notificação de 2FA -->
+            <div class="col-4 text-md-end">
+                <?php if (!$twoFactorEnabled): ?>
+                    <div class="alert alert-warning d-inline-block">
+                        <strong><?= _('Dash Attention') ?></strong> <?= _('Dash 2fa') ?>
+                        <a href="/<?= $currentLanguage ?>/enable2fa" class="btn btn-warning btn-sm"><?= _('Dash 2fa button') ?></a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
 
         <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
 
         <!-- Se o usuário for Admin -->
         <?php if ($role === 'admin'): ?>
-            <div class="alert alert-info"><?= _('Dash permission desc') ?></div>
+
 
             <div class="container mt-4">
                 <div class="row">
                     <!-- Cards de administração -->
-                    <div class="col-md-4">
+                    <div class="col-md-12">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?= _('Dash user') ?></h5>
@@ -67,7 +73,7 @@ SessionManager::renewSession();
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-12">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?= _('Dash clients') ?></h5>
@@ -76,7 +82,7 @@ SessionManager::renewSession();
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-12">
                         <div class="card">
                             <div class="card-body text-center">
                                 <h5 class="card-title"><?= _('Dash modules') ?></h5>
@@ -91,7 +97,7 @@ SessionManager::renewSession();
             <!-- Se o usuário for cliente comum -->
         <?php else: ?>
             <div id="external-modals"></div>
-            <div class="alert alert-warning"><?= _('Dash permission client') ?></div>
+
             <div class="container mt-4">
                 <div class="row">
                     <div class="col-md-10">
@@ -119,7 +125,7 @@ SessionManager::renewSession();
                         <?php
 
                         foreach ($empresas as $empresa): ?>
-                            
+
                             <div class="col-md-10">
                                 <div class="card">
                                     <div class="card-body text-center">
@@ -134,7 +140,7 @@ SessionManager::renewSession();
                                     </div>
                                 </div>
                             </div>
-                            
+
                         <?php endforeach; ?>
                     <?php endif; ?>
                 </div>

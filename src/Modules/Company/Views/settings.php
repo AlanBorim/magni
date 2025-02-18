@@ -84,7 +84,7 @@ SessionManager::renewSession();
                     case 'empresa':
                 ?>
                         <h6>Dados da Empresa</h6>
-                        <form action="/<?= $currentLanguage ?>/company/updateCompany" method="post" enctype="multipart/form-data">
+                        <form action="/<?= $currentLanguage ?>/<?= $slug?>/updateCompany" method="post" enctype="multipart/form-data">
                             <input type="hidden" name="company_id" value="<?= $company['id'] ?>">
 
                             <div class="row mb-3">
