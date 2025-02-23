@@ -1,7 +1,7 @@
 <?php
 
 use App\Modules\Company\CompanyController;
-use App\Modules\Company\UserController;
+
 
 
 // Rota para acessar a empresa pelo slug

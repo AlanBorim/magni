@@ -27,12 +27,12 @@ class CompanyController
      */
     public function showRegisterCompany()
     {
-        include __DIR__ . '/Views/register.php';
+        include __DIR__ . '/views/register.php';
     }
 
     public function showCompanySettings()
     {
-        include __DIR__ . '/Views/settings.php';
+        include __DIR__ . '/views/settings.php';
     }
 
     /**
