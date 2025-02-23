@@ -35,18 +35,33 @@ class Router
      */
     public function handleRequest()
     {
-        // Obtém a URI sem query string
-        $uri = strtok($_SERVER['REQUEST_URI'], '?');
+        // Obtém a URI completa (path e query string)
+        $fullUri = $_SERVER['REQUEST_URI'];
 
-        // Verifica se a URL contém o idioma no início
-        if (!preg_match('/^\/(pt|en)\//', $uri)) {
+        // Separa o caminho e a query string usando parse_url()
+        $path = parse_url($fullUri, PHP_URL_PATH);
+        $query = parse_url($fullUri, PHP_URL_QUERY);
+
+        // Verifica se a URL contém o idioma no início (pt ou en)
+        if (!preg_match('/^\/(pt|en)\//', $path)) {
             $language = LanguageDetector::detectLanguage()['language'] ?? 'pt';
-            header("Location: /$language$uri");
+            // Reconstrói a URL de redirecionamento, anexando a query string se existir
+            if ($query) {
+                // Substitui quaisquer "?" por "&"
+                $cleanQuery = str_replace('?', '&', $query);
+                // Remove um possível "&" inicial, caso exista
+                $cleanQuery = ltrim($cleanQuery, '&');
+                $redirectUrl = "/$language" . $path . "?$cleanQuery";
+            } else {
+                $redirectUrl = "/$language" . $path;
+            }
+            header("Location: " . $redirectUrl);
             exit;
         }
 
         $method = $_SERVER['REQUEST_METHOD'];
-        $uri = rtrim($uri, '/'); // Remove barra final
+        // Remove a barra final do caminho
+        $path = rtrim($path, '/');
 
         // Percorre as rotas registradas para encontrar correspondência
         foreach ($this->routes[$method] as $routePattern => $action) {
@@ -54,18 +69,20 @@ class Router
             $pattern = preg_replace('/\{([^\/]+)\}/', '([^/]+)', $routePattern);
             $pattern = "#^" . $pattern . "$#";
 
-            if (preg_match($pattern, $uri, $matches)) {
-                array_shift($matches); // Remove o primeiro item (URI completa)
+            if (preg_match($pattern, $path, $matches)) {
+                array_shift($matches); // Remove o primeiro item (path completo)
                 [$class, $method] = $action;
-                (new $class())->$method(...$matches); // Passa parâmetros dinâmicos
+                // Os parâmetros dinâmicos são passados para o método; a query string fica disponível via $_GET
+                (new $class())->$method(...$matches);
                 return;
             }
         }
 
-        // Caso a rota não seja encontrada
+        // Caso a rota não seja encontrada, retorna 404
         http_response_code(404);
         include __DIR__ . '/../inc/error404.php';
     }
+
 
 
 

@@ -76,7 +76,8 @@ SessionManager::renewSession();
             <!-- Conteúdo Principal -->
             <main class="col-md-10 ms-sm-auto mx-auto mt-4">
                 <h4>Configurações de <?= htmlspecialchars($company['company_name']) ?></h4>
-
+                <?php ViewHelper::includeIfReadable(__DIR__ . '/../../../inc/messagesReturn.php'); ?>
+                <hr>
                 <?php
                 $tab = $_GET['tab'] ?? 'empresa';
 
@@ -93,8 +94,8 @@ SessionManager::renewSession();
                                     <input type="text" class="form-control" id="companyName" name="companyName" value="<?= htmlspecialchars($company['company_name']) ?>" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="cnpj" class="form-label">CNPJ</label>
-                                    <input type="text" class="form-control" id="cnpj" name="cnpj" value="<?= htmlspecialchars($company['cnpj_cpf']) ?>" required>
+                                    <label for="cnpj" class="form-label">CNPJ / CPF</label>
+                                    <input type="text" class="form-control" id="cnpj" name="cnpj" value="<?= htmlspecialchars($company['cnpj_cpf']) ?>" readonly>
                                 </div>
                             </div>
 
@@ -129,9 +130,13 @@ SessionManager::renewSession();
                                     <label for="zipcode" class="form-label">CEP</label>
                                     <input type="text" class="form-control" id="zipcode" name="zipcode" value="<?= htmlspecialchars($company['zipcode']) ?>">
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <label for="address" class="form-label">Endereço</label>
                                     <input type="text" class="form-control" id="address" name="address" value="<?= htmlspecialchars($company['address']) ?>">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="addressNumber" class="form-label">Número</label>
+                                    <input type="text" class="form-control" id="addressNumber" name="addressNumber" value="<?= htmlspecialchars($company['address_number']) ?>">
                                 </div>
                             </div>
 
@@ -152,12 +157,17 @@ SessionManager::renewSession();
 
                             <div class="row mb-3">
                                 <div class="col-md-12">
-                                    <label for="description" class="form-label">Descrição da Empresa</label>
-                                    <textarea class="form-control" id="description" name="description" rows="3"><?= htmlspecialchars($company['description']) ?></textarea>
+                                    <label for="Description" class="form-label">Descrição da Empresa</label>
+                                    <textarea class="form-control" id="Description" name="Description" rows="3"><?= htmlspecialchars($company['description']) ?></textarea>
                                 </div>
                             </div>
 
                             <button type="submit" class="btn btn-primary w-100">Salvar Alterações</button>
+                            <input type="hidden" name="slug" value="<?= $slug ?>">
+                            <input type="hidden" name="atividade" value="<?= $company['activity'] ?>">
+                            <input type="hidden" name="atividadeCodigo" value="<?= $company['activity_code'] ?>">
+                            <input type="hidden" name="companyId" value="<?= $company['id'] ?>">
+                            <input type="hidden" name="status" value="<?= $company['status'] ?>">
                         </form>
 
 
@@ -168,7 +178,7 @@ SessionManager::renewSession();
                     ?>
                         <h4>Usuários da Empresa</h4>
                         <p>Gerencie os usuários que têm acesso à empresa.</p>
-                        <a href="/<?= $currentLanguage ?>/company/manageUsers" class="btn btn-info">Gerenciar Usuários</a>
+                        <a href="/<?= $currentLanguage ?>/company/manageUsers" class="btn btn-info">Novo Usuário</a>
                     <?php
                         break;
                     case 'modulos':

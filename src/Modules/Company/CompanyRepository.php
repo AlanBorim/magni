@@ -65,8 +65,7 @@ class CompanyRepository
         // Query para inserir os dados no banco
         $stmt = $this->db->prepare("INSERT INTO company 
         (company_name, cnpj_cpf, email, site, phone_number, country, state, city, zipcode, address, address_number, neighborhood, logo, description, status, activity, activity_code, slug, admin_id) 
-        VALUES (:company_name, :cnpj_cpf, :email, :site, :phone_number, :country, :state, :city, :zipcode, :address, :address_number, :neighborhood, :logo, :description, :status, :activity, :activity_code, :slug, :admin_id)
-    ");
+        VALUES (:company_name, :cnpj_cpf, :email, :site, :phone_number, :country, :state, :city, :zipcode, :address, :address_number, :neighborhood, :logo, :description, :status, :activity, :activity_code, :slug, :admin_id)");
 
         $stmt->execute([
             ':company_name' => $data['companyName'],
@@ -149,5 +148,34 @@ class CompanyRepository
         $stmt = $this->db->prepare("SELECT * FROM company WHERE admin_id = :admin_id");
         $stmt->execute(['admin_id' => $userId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function updateCompany(array $data): mixed
+    {
+        $stmt = $this->db->prepare("UPDATE company SET company_name = :company_name, cnpj_cpf = :cnpj_cpf, email = :email, site = :site, phone_number = :phone_number, country = :country, state = :state, city = :city, zipcode = :zipcode, address = :address, address_number = :address_number, neighborhood = :neighborhood, description = :description, status = :status, activity = :activity, activity_code = :activity_code WHERE id = :id");
+        if (!$stmt->execute([
+            ':company_name'    => $data['companyName'],
+            ':cnpj_cpf'        => $data['cnpj'],
+            ':email'           => $data['email'],
+            ':site'            => $data['site'],
+            ':phone_number'    => $data['phoneNumber'],
+            ':country'         => $data['country'],
+            ':state'           => $data['state'],
+            ':city'            => $data['city'],
+            ':zipcode'         => $data['zipcode'],
+            ':address'         => $data['address'],
+            ':address_number'  => $data['addressNumber'],
+            ':neighborhood'    => $data['neighborhood'],
+            ':description'     => $data['Description'],
+            ':status'          => $data['status'],
+            ':activity'        => $data['atividade'],
+            ':activity_code'   => $data['atividadeCodigo'],
+            ':id'              => $data['companyId']
+        ])) {
+            $errorInfo = $stmt->errorInfo();
+            return "Erro: " . $errorInfo[2];
+        }
+
+        return true;
     }
 }

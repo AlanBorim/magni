@@ -10,19 +10,30 @@ use PDO;
 
 class CompanyService
 {
-    
-    public function registerCompany($data,$file)
+
+    public function registerCompany($data, $file)
     {
-        
+
         $data['slug'] = Helper::slugify($data['companyName']); // Gera um slug a partir do nome
         $data['user_id'] = SessionManager::get('user_id'); // Pega o ID do usuário logado
         // Verifica se o slug já existe, se sim, adiciona um número ao final
         $slug = $this->ensureUniqueSlug($data['slug']);
-        
+
         $repo = new CompanyRepository();
-        $repo->insertCompany($data,$file); // Insere a empresa no banco de dados
+        $repo->insertCompany($data, $file); // Insere a empresa no banco de dados
 
         return $slug; // Retorna o slug da empresa cadastrada
+    }
+
+    public function updateCompany(array $data): bool
+    {
+        $repo = new CompanyRepository();
+        
+        if ($repo->updateCompany($data)) {
+            return true;
+        }
+        
+        return false;
     }
 
     private function ensureUniqueSlug($slug)
@@ -49,7 +60,22 @@ class CompanyService
     public function getCompaniesByAdmin($adminId)
     {
         $repo = new CompanyRepository();
-        return $repo->getCompanies($adminId); 
+        return $repo->getCompanies($adminId);
+    }
 
+    /**
+     * Busca uma empresa pelo CNPJ.
+     *
+     * @param integer $cnpj
+     * @return array|null
+     */
+    public function findByCNPJ(int $cnpj): ?array
+    {
+        $db = Database::getInstance();
+        $stmt = $db->prepare("SELECT * FROM company WHERE cnpj_cpf = :cnpj LIMIT 1");
+        $stmt->execute(['cnpj' => $cnpj]);
+
+        $company = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $company ?: null;
     }
 }

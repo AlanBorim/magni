@@ -11,6 +11,7 @@ use App\Modules\Company\CompanyService;
 use App\Modules\Company\CompanyRepository;
 use App\Modules\Login\LoginController;
 use App\Modules\Dashboard\DashboardController;
+use RuntimeException;
 
 class CompanyController
 {
@@ -41,18 +42,37 @@ class CompanyController
     {
         Security::initializeSessionSecurity();
 
+        if ($this->companyService->findByCNPJ($_REQUEST['cnpj'])) {
+            MessageHandler::redirectWithMessage('error', 'company_error', 'Empresa já cadastrada!', '/company/registerCompany');
+        }
+
         $adminUserId = SessionManager::get('user_id');
         $slug = Helper::slugify($_REQUEST['companyName']);
 
-
-        $companyId = $this->companyService->registerCompany($_REQUEST,$_FILES);
+        $companyId = $this->companyService->registerCompany($_REQUEST, $_FILES);
 
         MessageHandler::redirectWithMessage('success', 'company_success', 'Empresa cadastrada com sucesso!', "/$slug/dashboard");
     }
 
     public function processUpdateCompany()
     {
-        var_dump($_REQUEST);
+        Security::initializeSessionSecurity();
+
+        try {
+
+            // Valida se a sessão foi realmente criada
+            if (!$this->companyService->updateCompany($_REQUEST)) {
+                throw new RuntimeException("Falha ao atualizar os dados da empresa.");
+            }
+
+            MessageHandler::redirectWithMessage('success', 'company_update_success', 'Dados da empresa alterados com sucesso!', "/" . $_REQUEST['slug'] . "/settings?s=" . base64_encode($_REQUEST['slug']));
+            return;
+        } catch (RuntimeException $e) {
+
+            MessageHandler::redirectWithMessage('danger', 'company_update_error', 'Erro ao atualizar os dados. ' . $e->getMessage() . ' Tente novamente.', "/" . $_REQUEST['slug'] . "/settings?s=" . base64_encode($_REQUEST['slug']));
+
+            return;
+        }
     }
 
 
