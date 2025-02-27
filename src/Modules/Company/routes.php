@@ -2,12 +2,20 @@
 
 use App\Modules\Company\CompanyController;
 
+// Rota para cadastro de empresa
+$router->get('/company/registerCompany', [CompanyController::class, 'showRegisterCompany']);
 
+// Rota para verificação de acesso à empresa via slug
+$router->get('/{companySlug}/login', [CompanyController::class, 'accessCompany']);
 
-// Rota para acessar a empresa pelo slug
-$router->get('/company/registerCompany', [CompanyController::class, 'showRegisterCompany']); // Cadastro de empresa
-$router->get('/{companySlug}/login', [CompanyController::class, 'handleCompanyAccess']);
-$router->get('/{companySlug}/settings', [CompanyController::class, 'showCompanySettings']); // Configurações da empresa
+// Rota para exibição do dashboard da empresa
+$router->get('/{companySlug}/dashboard', [CompanyController::class, 'showCompanyDashboard']);
 
-$router->post('/company/register', [CompanyController::class, 'processRegisterCompany']); // Processar cadastro
-$router->post('/{companySlug}/updateCompany', [CompanyController::class, 'processUpdateCompany']); // Configurações da empresa
+// Rota para exibição das configurações da empresa
+$router->get('/{companySlug}/settings', [CompanyController::class, 'showCompanySettings']);
+
+// Processa o cadastro da empresa
+$router->post('/company/register', [CompanyController::class, 'processRegisterCompany']);
+
+// Atualiza os dados da empresa (rotina existente)
+$router->post('/{companySlug}/updateCompany', [CompanyController::class, 'processUpdateCompany']);

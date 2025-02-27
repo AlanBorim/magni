@@ -35,6 +35,11 @@ class CompanyController
         include __DIR__ . '/views/settings.php';
     }
 
+    public function showCompanyDashboard()
+    {
+        include __DIR__ . '/views/dashboard.php';
+    }
+
     /**
      * Processa o cadastro da empresa e define o usuário logado como admin
      */
@@ -108,5 +113,29 @@ class CompanyController
         // Se não estiver logado, direciona para a tela de login da empresa
         $loginController = new LoginController();
         $loginController->showLogin($language, $companySlug);
+    }
+
+    /**
+     * Verifica o acesso à empresa e redireciona conforme o status do usuário.
+     * 
+     * Quando o link <em>magni.apoio19.com.br/pt/slug-da-empresa</em> é acessado:
+     * - Se o usuário estiver logado, redireciona para o dashboard da empresa.
+     * - Caso contrário, exibe a tela de login da empresa.
+     *
+     * @param string $slug O identificador da empresa na URL.
+     */
+    public function accessCompany(string $slug)
+    {
+        Security::initializeSessionSecurity();
+        $user = SessionManager::get('user');
+
+        if ($user) {
+            // Usuário logado, redireciona para o dashboard da empresa
+            header("Location: /{$slug}/dashboard/");
+            exit;
+        } else {
+            // Usuário não logado, exibe a tela de login da empresa
+            include __DIR__ . '/views/login.php';
+        }
     }
 }
